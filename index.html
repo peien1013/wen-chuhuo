@@ -452,9 +452,11 @@ var API   = "https://script.google.com/macros/s/AKfycbwFy68m0LzFYHILxz89qKQy2TmI
 /* ===== 通行碼 =====
    這個網頁是公開的（GitHub Pages），所以後台密碼「不寫在原始碼裡」。
    第一次打開會問一次，之後存在這台電腦的瀏覽器（localStorage），不用再打。
-   換電腦要再輸入一次；輸錯會再問。 */
+   換電腦要再輸入一次；輸錯會再問。
+   ⚠ 不用 window.prompt —— 瀏覽器可能封鎖它（使用者勾了「不要再顯示對話方塊」、
+     或頁面被嵌在 iframe 裡），一被封整頁就卡在「讀取中」。改成頁面自己畫一個輸入框。 */
 var PASS_KEY = "wenChuhuoPass";
-var passMem  = "";
+var passMem  = "";                        /* localStorage 不能用時的備援 */
 function getPass(){
   try { return localStorage.getItem(PASS_KEY) || ""; } catch(e){ return passMem; }
 }
@@ -462,25 +464,58 @@ function setPass(v){
   passMem = v;
   try { localStorage.setItem(PASS_KEY, v); } catch(e){}
 }
-function askPass(prompt){
-  var v = window.prompt(prompt || "請輸入穩出貨通行碼（這台電腦只要輸入一次）：", "");
-  v = (v || "").trim();
-  if(v) setPass(v);
-  return v;
+function showPassBox(title, cb){
+  var m = document.createElement("div");
+  m.style.cssText = "position:fixed;inset:0;background:rgba(20,15,35,.55);z-index:99999;" +
+    "display:flex;align-items:center;justify-content:center;padding:20px";
+  var box = document.createElement("div");
+  box.style.cssText = "background:#fff;border-radius:16px;padding:26px 28px;max-width:460px;" +
+    "width:100%;box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:inherit";
+  box.innerHTML =
+    '<div style="font-size:21px;font-weight:800;margin-bottom:8px">🔒 穩出貨</div>' +
+    '<div style="font-size:17px;line-height:1.7;color:#444;margin-bottom:14px"></div>' +
+    '<input type="text" autocomplete="off" style="width:100%;font-size:20px;padding:12px 14px;' +
+      'border:2px solid #7b3fd4;border-radius:10px;font-family:inherit;box-sizing:border-box">' +
+    '<div style="font-size:14px;color:#8a8f96;margin-top:10px">輸入一次就好，這台電腦會記住。</div>' +
+    '<div style="text-align:right;margin-top:16px"><button type="button" style="font-size:18px;' +
+      'font-weight:800;padding:11px 28px;border:0;border-radius:9px;background:#7b3fd4;' +
+      'color:#fff;cursor:pointer;font-family:inherit">確定</button></div>';
+  box.children[1].textContent = title;
+  m.appendChild(box);
+  document.body.appendChild(m);
+  var inp = box.querySelector("input"), btn = box.querySelector("button"), fired = false;
+  function done(){
+    if(fired) return; fired = true;
+    var v = inp.value.replace(/^\s+|\s+$/g, "");
+    if(m.parentNode) m.parentNode.removeChild(m);
+    cb(v);
+  }
+  btn.onclick = done;
+  inp.onkeydown = function(e){ if(e.keyCode === 13 || e.key === "Enter"){ e.preventDefault(); done(); } };
+  setTimeout(function(){ try { inp.focus(); } catch(e){} }, 50);
+}
+function needPass(cb){
+  var p = getPass();
+  if(p){ cb(p); return; }
+  showPassBox("請輸入通行碼才能載入名單：", function(v){ if(v) setPass(v); cb(v); });
 }
 /* 打 API 都走這支：自動帶通行碼，碼不對就再問一次 */
 function api(params, cb, retried){
-  var p = getPass() || askPass();
-  if(!p){ cb({ ok:false, error:"沒有輸入通行碼" }); return; }
-  jsonp(params, function(res){
-    var e = String(res.error || "");
-    /* Apps Script 第一次被叫醒常常要 15 秒以上，逾時就自動再試一次，不要嚇使用者 */
-    if(!res.ok && !retried && /逾時|連不上/.test(e)){ api(params, cb, true); return; }
-    if(!res.ok && !retried && /token|通行碼/.test(e)){
-      setPass("");
-      if(askPass("通行碼不對，再輸入一次：")){ api(params, cb, true); return; }
-    }
-    cb(res);
+  needPass(function(p){
+    if(!p){ cb({ ok:false, error:"沒有輸入通行碼" }); return; }
+    jsonp(params, function(res){
+      var e = String(res.error || "");
+      /* Apps Script 第一次被叫醒常常要 15 秒以上，逾時就自動再試一次，不要嚇使用者 */
+      if(!res.ok && !retried && /逾時|連不上/.test(e)){ api(params, cb, true); return; }
+      if(!res.ok && !retried && /token|通行碼/.test(e)){
+        setPass("");
+        showPassBox("通行碼不對，再輸入一次：", function(v){
+          if(v){ setPass(v); api(params, cb, true); } else cb(res);
+        });
+        return;
+      }
+      cb(res);
+    });
   });
 }
 var jsonpN = 0;
