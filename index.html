@@ -473,7 +473,10 @@ function api(params, cb, retried){
   var p = getPass() || askPass();
   if(!p){ cb({ ok:false, error:"沒有輸入通行碼" }); return; }
   jsonp(params, function(res){
-    if(!res.ok && !retried && /token|通行碼/.test(String(res.error || ""))){
+    var e = String(res.error || "");
+    /* Apps Script 第一次被叫醒常常要 15 秒以上，逾時就自動再試一次，不要嚇使用者 */
+    if(!res.ok && !retried && /逾時|連不上/.test(e)){ api(params, cb, true); return; }
+    if(!res.ok && !retried && /token|通行碼/.test(e)){
       setPass("");
       if(askPass("通行碼不對，再輸入一次：")){ api(params, cb, true); return; }
     }
@@ -486,7 +489,7 @@ function jsonp(params, cb){
   var name = "__wc" + (++jsonpN) + "_" + String(jsonpN * 7919 % 100000);
   var s = document.createElement("script");
   var done = false;
-  var timer = setTimeout(function(){ finish({ ok:false, error:"連不上（逾時）" }); }, 15000);
+  var timer = setTimeout(function(){ finish({ ok:false, error:"連不上（逾時）" }); }, 25000);
   function finish(res){
     if(done) return; done = true;
     clearTimeout(timer);
