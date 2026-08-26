@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>姓名貼紙產生器</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+:root{
+  --ink:#1a1a1a; --line:#d8d8d8; --bg:#f4f5f7; --card:#fff;
+  --brand:#7b3fd4; --ok:#00913A; --warn:#c26a00;   /* 主色＝總入口「第 1 步」的紫 */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;}
+
+/* ========== 操作介面（列印時隱藏） ========== */
+.ui{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+.back{display:inline-flex;align-items:center;gap:7px;font-size:15px;font-weight:700;
+  color:#666;text-decoration:none;padding:8px 16px;border:1px solid var(--line);
+  border-radius:22px;background:#fff;margin-bottom:16px;transition:.15s}
+.back:hover{border-color:var(--brand);color:var(--brand);transform:translateX(-3px)}
+.ui h1{font-size:26px;margin:0 0 4px}
+.ui .sub{color:#666;font-size:15px;margin:0 0 18px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:14px}
+.panel h2{font-size:17px;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid #eee}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:13px;color:#555;font-weight:600}
+.f input,.f select{font-size:16px;padding:7px 9px;border:1px solid #bbb;border-radius:7px;
+  font-family:inherit}
+.f input[type=number]{width:96px}
+.f .wide{width:150px}
+textarea{width:100%;min-height:190px;font-size:16px;line-height:1.7;padding:11px;
+  border:1px solid #bbb;border-radius:8px;font-family:"Consolas","Microsoft JhengHei",monospace;
+  resize:vertical}
+button{font-size:16px;font-weight:700;padding:11px 20px;border:0;border-radius:9px;
+  background:var(--brand);color:#fff;cursor:pointer;font-family:inherit}
+button:hover{filter:brightness(1.08)}
+button.g{background:var(--ok)}
+button.w{background:#666}
+.hint{font-size:13px;color:#777;line-height:1.7;margin:9px 0 0}
+.hint b{color:var(--warn)}
+.tag{display:inline-block;background:#eef4ff;color:var(--brand);border-radius:20px;
+  padding:3px 11px;font-size:13px;font-weight:700;margin-right:6px}
+#msg{font-size:15px;font-weight:700;margin-left:12px}
+.presets button{background:#fff;color:#333;border:1px solid #bbb;font-size:14px;
+  padding:8px 13px;font-weight:600}
+.presets button:hover{border-color:var(--brand);color:var(--brand)}
+.warnbox{background:#fff8e8;border:1px solid #f0d089;border-radius:9px;padding:11px 14px;
+  font-size:14px;line-height:1.75;margin-top:12px}
+
+/* ========== 貼紙版面 ========== */
+#out{margin:0 auto}
+.sheet{width:210mm;height:297mm;position:relative;background:#fff;overflow:hidden;
+  margin:0 auto 16px;box-shadow:0 2px 14px rgba(0,0,0,.16)}
+.cell{position:absolute;overflow:hidden;display:flex;align-items:center;
+  padding:2.4mm;gap:2.2mm}
+.cell .qr{flex:0 0 auto;line-height:0}
+.cell .tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;
+  justify-content:center;gap:0.6mm}
+.cell .no{font-size:3.4mm;font-weight:700;color:#000;letter-spacing:.4px;line-height:1.05;
+  max-width:100%;overflow:hidden;white-space:nowrap}
+/* 姓名（大字）＋分類（小字）同一行；調 .nmline 的 font-size 就兩個一起縮放 */
+.cell .nmline{display:flex;align-items:baseline;gap:0.4mm;white-space:nowrap;
+  max-width:100%;overflow:hidden;line-height:1.06}
+.cell .nm{font-weight:800;color:#000;font-size:1em}
+.cell .tg{font-weight:700;color:#000;font-size:0.4em;flex:0 0 auto}
+.cell.center{justify-content:center;text-align:center}
+.cell.center .tx{align-items:center}
+.cell.center .nmline{justify-content:center}
+/* 條碼版面：姓名在上、條碼在下 */
+.cell.vert{flex-direction:column;justify-content:center;align-items:center;
+  gap:0.8mm;padding:1.4mm 2.2mm;text-align:center}
+.cell.vert .bc{line-height:0;flex:0 0 auto}
+.cell.vert .nmline{justify-content:center;flex:0 0 auto}
+.cell.vert .no{flex:0 0 auto;font-size:2.9mm;color:#444}
+
+/* 對位測試頁 */
+.sheet.test .cell{border:0.3mm dashed #999}
+.sheet.test .cross{position:absolute;color:#c00;font-size:3mm;font-weight:700}
+.testno{position:absolute;font-size:3.2mm;color:#0a0;font-weight:700;left:1mm;top:1mm}
+
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fff;margin:0;padding:0}
+  .ui{display:none !important}
+  #out{margin:0}
+  .sheet{box-shadow:none;margin:0;page-break-after:always;break-after:page}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="ui">
+  <a class="back" href="index.html">← 回出貨總入口</a>
+  <h1>🏷️ 姓名貼紙產生器</h1>
+  <p class="sub">第 1 步 · 印出「姓名＋分類＋條碼」貼在商品上</p>
+
+  <div class="panel">
+    <h2>① 貼上名單</h2>
+    <textarea id="list" placeholder="一行一個人，直接貼上就好：&#10;王小明&#10;陳美玲&#10;林大寶&#10;&#10;想自己指定編號的話，用逗號或 Tab 分隔（第二欄＝編號）：&#10;王小明,S001&#10;陳美玲,S002"></textarea>
+    <p class="hint">
+      一行一個人。<b>第二欄可填自訂編號</b>（用逗號、Tab 或空白分隔），沒填就照下面的規則自動編號。<br>
+      空白行會自動跳過。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>② 編號與內容</h2>
+    <div class="row">
+      <div class="f"><label>編號前綴</label><input id="prefix" value="S" maxlength="4"></div>
+      <div class="f"><label>起始號碼</label><input id="startNo" type="number" value="1" min="0"></div>
+      <div class="f"><label>號碼位數</label><input id="pad" type="number" value="3" min="1" max="6"></div>
+      <div class="f"><label>每人印幾張</label><input id="copies" type="number" value="1" min="1" max="20"></div>
+      <div class="f"><label>版面</label>
+        <select id="layout" class="wide" style="width:230px">
+          <option value="barbig">姓名 ＋ 條碼（不印編號）</option>
+          <option value="bar">姓名 ＋ 條碼 ＋ 編號小字</option>
+          <option value="qrbig">姓名 ＋ QR（不印編號）</option>
+          <option value="qr">姓名 ＋ QR ＋ 編號</option>
+          <option value="nameonly">只有姓名（超大字）</option>
+          <option value="noqr">只有姓名 ＋ 編號（不印碼）</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">
+      掃出來就是那串編號（例：<b>S024</b>）。內容越短方塊／線條越粗、越掃得到 —— 別放網址。<br>
+      <b>條碼（Code 128）一維槍二維槍都掃得到，而且可以壓矮，小標籤上名字能放更大</b>；
+      QR 比較省寬度但<b>只有二維槍掃得到</b>。不確定你的槍是哪種，就先用條碼。<br>
+      條碼只能用<b>英數和 - 符號</b>，編號別打中文。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>③ 你的貼紙規格</h2>
+    <div class="row presets" style="margin-bottom:14px">
+      <span style="font-size:13px;color:#555;font-weight:600;align-self:center">快速套用：</span>
+      <button type="button" onclick="preset(3,10,70,29.7,0,0,0,0)">鶴屋 C3070（3×10，滿版）</button>
+      <button type="button" onclick="preset(2,6,105,48,0,10.5,0,0)">A4 12格（105×48）</button>
+      <button type="button" onclick="preset(3,7,70,42.3,0,4.5,0,0)">A4 21格（70×42.3）</button>
+      <button type="button" onclick="preset(2,2,105,148.5,0,0,0,0)">A4 4格（105×148.5）</button>
+      <button type="button" onclick="preset(3,8,70,37.1,0,0,0,0)" style="border-color:#00913A;color:#00913A;font-weight:800">★ 整張不分割 3×8（最好裁）</button>
+      <button type="button" onclick="preset(3,10,70,29.7,0,0,0,0)">整張不分割 3×10（省紙）</button>
+      <button type="button" onclick="preset(2,8,105,37.1,0,0,0,0)">整張不分割 2×8（字最大）</button>
+    </div>
+    <div class="row">
+      <div class="f"><label>幾欄</label><input id="cols" type="number" value="3" min="1" max="10"></div>
+      <div class="f"><label>幾列</label><input id="rows" type="number" value="8" min="1" max="20"></div>
+      <div class="f"><label>格寬 mm</label><input id="cw" type="number" value="70" step="0.1"></div>
+      <div class="f"><label>格高 mm</label><input id="ch" type="number" value="37.1" step="0.1"></div>
+      <div class="f"><label>左邊界 mm</label><input id="ml" type="number" value="0" step="0.1"></div>
+      <div class="f"><label>上邊界 mm</label><input id="mt" type="number" value="0" step="0.1"></div>
+      <div class="f"><label>欄間距 mm</label><input id="gx" type="number" value="0" step="0.1"></div>
+      <div class="f"><label>列間距 mm</label><input id="gy" type="number" value="0" step="0.1"></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div class="f"><label>從第幾格開始印</label><input id="skip" type="number" value="1" min="1"></div>
+      <div class="f"><label>QR 大小 mm</label><input id="qrmm" type="number" value="24" step="0.5" min="10"></div>
+      <div class="f"><label>條碼高 mm</label><input id="barmm" type="number" value="10" step="0.5" min="4"></div>
+      <div class="f"><label>姓名字級 mm</label><input id="nmm" type="number" value="8" step="0.5" min="3"></div>
+      <div class="f"><label>裁切線</label>
+        <select id="cutline" style="width:210px">
+          <option value="line">田字格線（沿線切，推薦）</option>
+          <option value="both">格線 ＋ 邊緣標記</option>
+          <option value="mark">只印邊緣裁切標記</option>
+          <option value="none">都不印</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">
+      <b>「從第幾格開始印」</b>＝用剩半張紙時，從還沒撕掉的那格接著印，不浪費。左上第一格是 1，往右數。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>④ 產生與列印</h2>
+    <div class="row">
+      <button onclick="render()">產生貼紙</button>
+      <button class="g" onclick="doPrint()">列印</button>
+      <button class="w" onclick="testPage()">先印對位測試頁</button>
+      <span id="msg"></span>
+    </div>
+    <div class="warnbox">
+      <b>列印對話框一定要這樣設，不然會歪：</b><br>
+      　紙張大小 <b>A4</b>　·　縮放 <b>100%（不要選「符合頁面」）</b>　·　邊界 <b>無</b>　·　關閉「頁首及頁尾」<br>
+      <br>
+      <b>第一次印一定要先按「先印對位測試頁」</b>，拿<b>普通白紙</b>印一張，
+      疊在貼紙上對著光看格線準不準。準了再換貼紙印正式的 —— 貼紙很貴，別直接賭。
+    </div>
+  </div>
+</div>
+
+<div id="out"></div>
+
+<script>
+/* =========================================================================
+   QR Code 產生器（Byte mode／錯誤更正 H／Version 1-10）
+   自己實作，不靠外部函式庫 —— 沒網路也能用，整份可以直接搬進 Apps Script。
+   錯誤更正用最高的 H(30%)：噴墨會微微暈墨，容錯高才掃得穩。
+   短編號（4~7 字）只會用到 Version 1（21x21），方塊最粗最好掃。
+   ========================================================================= */
+var QR = (function(){
+  var EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (function(){
+    var x = 1, i;
+    for(i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x & 0x100) x ^= 0x11d; }
+    for(i=255;i<512;i++) EXP[i] = EXP[i-255];
+  })();
+
+  /* EC level H：[每塊EC碼字數, [[塊數, 每塊資料碼字], ...]] */
+  var RS_H = {
+    1:[17,[[1,9]]],         2:[28,[[1,16]]],        3:[22,[[2,13]]],
+    4:[16,[[4,9]]],         5:[22,[[2,11],[2,12]]], 6:[28,[[4,15]]],
+    7:[26,[[4,13],[1,14]]], 8:[26,[[4,14],[2,15]]], 9:[24,[[4,12],[4,13]]],
+    10:[28,[[6,15],[2,16]]]
+  };
+  var ALIGN = {1:[],2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],
+               7:[6,22,38],8:[6,24,42],9:[6,26,46],10:[6,28,50]};
+
+  function polyMul(a,b){
+    var r = new Uint8Array(a.length + b.length - 1), i, j, la;
+    for(i=0;i<a.length;i++){
+      if(!a[i]) continue;
+      la = LOG[a[i]];
+      for(j=0;j<b.length;j++) if(b[j]) r[i+j] ^= EXP[la + LOG[b[j]]];
+    }
+    return r;
+  }
+  function rsGenPoly(n){
+    var g = Uint8Array.from([1]);
+    for(var i=0;i<n;i++) g = polyMul(g, Uint8Array.from([1, EXP[i]]));
+    return g;
+  }
+  function rsEncode(data, ecLen){
+    var gen = rsGenPoly(ecLen);
+    var buf = new Uint8Array(data.length + ecLen);
+    buf.set(data);
+    for(var i=0;i<data.length;i++){
+      var f = buf[i];
+      if(!f) continue;
+      var lf = LOG[f];
+      for(var j=0;j<gen.length;j++) if(gen[j]) buf[i+j] ^= EXP[LOG[gen[j]] + lf];
+    }
+    return buf.slice(data.length);
+  }
+
+  function utf8Bytes(s){
+    var out = [], i, cp;
+    for(i=0;i<s.length;i++){
+      cp = s.codePointAt(i);
+      if(cp > 0xffff) i++;
+      if(cp < 0x80) out.push(cp);
+      else if(cp < 0x800) out.push(0xc0|(cp>>6), 0x80|(cp&63));
+      else if(cp < 0x10000) out.push(0xe0|(cp>>12), 0x80|((cp>>6)&63), 0x80|(cp&63));
+      else out.push(0xf0|(cp>>18), 0x80|((cp>>12)&63), 0x80|((cp>>6)&63), 0x80|(cp&63));
+    }
+    return out;
+  }
+
+  function totalDataCw(v){
+    var g = RS_H[v][1], s = 0;
+    for(var i=0;i<g.length;i++) s += g[i][0] * g[i][1];
+    return s;
+  }
+  function pickVersion(len){
+    for(var v=1;v<=10;v++){
+      var header = 4 + (v<=9 ? 8 : 16);
+      if(totalDataCw(v)*8 - header >= len*8) return v;
+    }
+    throw new Error("QR 內容太長，最多約 119 個字元");
+  }
+
+  function encodeData(bytes, ver){
+    var total = totalDataCw(ver), cap = total*8, bits = [], i, j;
+    function push(val, len){ for(var k=len-1;k>=0;k--) bits.push((val>>k)&1); }
+    push(4, 4);                                /* byte mode */
+    push(bytes.length, ver<=9 ? 8 : 16);       /* 字元數 */
+    for(i=0;i<bytes.length;i++) push(bytes[i], 8);
+    for(i=0;i<4 && bits.length<cap;i++) bits.push(0);   /* 終止符 */
+    while(bits.length % 8) bits.push(0);
+    var cw = [];
+    for(i=0;i<bits.length;i+=8){
+      var v = 0;
+      for(j=0;j<8;j++) v = (v<<1) | bits[i+j];
+      cw.push(v);
+    }
+    var PAD = [0xEC, 0x11], p = 0;
+    while(cw.length < total) cw.push(PAD[(p++) % 2]);
+    return cw;
+  }
+
+  function interleave(ver, dataCw){
+    var ecLen = RS_H[ver][0], groups = RS_H[ver][1];
+    var blocks = [], p = 0, gi, i, dc, d;
+    for(gi=0; gi<groups.length; gi++){
+      for(i=0;i<groups[gi][0];i++){
+        dc = groups[gi][1];
+        d = Uint8Array.from(dataCw.slice(p, p+dc));
+        p += dc;
+        blocks.push({ d: d, e: rsEncode(d, ecLen) });
+      }
+    }
+    var out = [], maxD = 0, b;
+    for(b=0;b<blocks.length;b++) if(blocks[b].d.length > maxD) maxD = blocks[b].d.length;
+    for(i=0;i<maxD;i++)
+      for(b=0;b<blocks.length;b++)
+        if(i < blocks[b].d.length) out.push(blocks[b].d[i]);
+    for(i=0;i<ecLen;i++)
+      for(b=0;b<blocks.length;b++) out.push(blocks[b].e[i]);
+    return out;
+  }
+
+  function bchFormat(ecl, mask){
+    var data = (ecl<<3) | mask, d = data << 10;
+    for(var i=14;i>=10;i--) if((d>>i)&1) d ^= 0x537 << (i-10);
+    return ((data<<10) | d) ^ 0x5412;
+  }
+  function bchVersion(v){
+    var d = v << 12;
+    for(var i=17;i>=12;i--) if((d>>i)&1) d ^= 0x1f25 << (i-12);
+    return (v<<12) | d;
+  }
+
+  var MASKS = [
+    function(r,c){ return ((r+c)%2)===0; },
+    function(r,c){ return (r%2)===0; },
+    function(r,c){ return (c%3)===0; },
+    function(r,c){ return ((r+c)%3)===0; },
+    function(r,c){ return ((((r/2)|0)+((c/3)|0))%2)===0; },
+    function(r,c){ return (((r*c)%2)+((r*c)%3))===0; },
+    function(r,c){ return ((((r*c)%2)+((r*c)%3))%2)===0; },
+    function(r,c){ return ((((r+c)%2)+((r*c)%3))%2)===0; }
+  ];
+
+  function baseMatrix(ver){
+    var n = ver*4 + 17, r, c, i, j;
+    var m = [], fx = [];
+    for(r=0;r<n;r++){ m.push(new Uint8Array(n)); fx.push(new Uint8Array(n)); }
+    function set(rr, cc, v){
+      if(rr>=0 && rr<n && cc>=0 && cc<n){ m[rr][cc]=v; fx[rr][cc]=1; }
+    }
+
+    function finder(r0, c0){
+      for(var dr=-1;dr<=7;dr++) for(var dc=-1;dc<=7;dc++){
+        var ring = (dr>=0&&dr<=6&&(dc===0||dc===6)) || (dc>=0&&dc<=6&&(dr===0||dr===6));
+        var core = (dr>=2&&dr<=4&&dc>=2&&dc<=4);
+        set(r0+dr, c0+dc, (ring||core) ? 1 : 0);
+      }
+    }
+    finder(0,0); finder(0,n-7); finder(n-7,0);
+
+    for(i=8;i<n-8;i++){ var tv = (i%2===0)?1:0; set(6,i,tv); set(i,6,tv); }
+
+    var ap = ALIGN[ver];
+    for(i=0;i<ap.length;i++) for(j=0;j<ap.length;j++){
+      var ar = ap[i], ac = ap[j];
+      if((ar<=8&&ac<=8) || (ar<=8&&ac>=n-9) || (ar>=n-9&&ac<=8)) continue;
+      for(var dr2=-2;dr2<=2;dr2++) for(var dc2=-2;dc2<=2;dc2++)
+        set(ar+dr2, ac+dc2, Math.max(Math.abs(dr2),Math.abs(dc2))!==1 ? 1 : 0);
+    }
+
+    set(n-8, 8, 1);   /* dark module */
+
+    for(i=0;i<=8;i++){ if(!fx[8][i]) set(8,i,0); if(!fx[i][8]) set(i,8,0); }
+    for(i=0;i<8;i++){ if(!fx[8][n-1-i]) set(8,n-1-i,0); if(!fx[n-1-i][8]) set(n-1-i,8,0); }
+
+    if(ver>=7)
+      for(i=0;i<6;i++) for(j=0;j<3;j++){ set(n-11+j, i, 0); set(i, n-11+j, 0); }
+
+    return { n:n, m:m, fx:fx };
+  }
+
+  function placeBits(n, m, fx, cw){
+    var total = cw.length * 8, bi = 0, up = true, col, k, d, c, row, bit;
+    for(col = n-1; col > 0; col -= 2){
+      if(col === 6) col = 5;              /* 跳過 timing 直行 */
+      for(k=0;k<n;k++){
+        row = up ? (n-1-k) : k;
+        for(d=0; d<2; d++){
+          c = col - d;
+          if(fx[row][c]) continue;
+          bit = 0;
+          if(bi < total) bit = (cw[bi>>3] >> (7 - (bi & 7))) & 1;
+          bi++;
+          m[row][c] = bit;
+        }
+      }
+      up = !up;
+    }
+  }
+
+  function penalty(m, n){
+    var p = 0, r, c, i, j, k, dir, run, prev, v;
+    /* 規則1：同色連續 >=5 */
+    for(i=0;i<n;i++){
+      for(dir=0; dir<2; dir++){
+        run = 1; prev = dir ? m[0][i] : m[i][0];
+        for(j=1;j<n;j++){
+          v = dir ? m[j][i] : m[i][j];
+          if(v === prev) run++;
+          else { if(run>=5) p += 3 + (run-5); run = 1; prev = v; }
+        }
+        if(run>=5) p += 3 + (run-5);
+      }
+    }
+    /* 規則2：2x2 同色 */
+    for(r=0;r<n-1;r++) for(c=0;c<n-1;c++){
+      var q = m[r][c];
+      if(q===m[r][c+1] && q===m[r+1][c] && q===m[r+1][c+1]) p += 3;
+    }
+    /* 規則3：1:1:3:1:1 樣式 */
+    var P1 = [1,0,1,1,1,0,1,0,0,0,0], P2 = [0,0,0,0,1,0,1,1,1,0,1];
+    for(r=0;r<n;r++) for(c=0;c<=n-11;c++){
+      var a1=true, b1=true;
+      for(k=0;k<11;k++){ if(m[r][c+k]!==P1[k]) a1=false; if(m[r][c+k]!==P2[k]) b1=false; }
+      if(a1) p+=40;
+      if(b1) p+=40;
+    }
+    for(c=0;c<n;c++) for(r=0;r<=n-11;r++){
+      var a2=true, b2=true;
+      for(k=0;k<11;k++){ if(m[r+k][c]!==P1[k]) a2=false; if(m[r+k][c]!==P2[k]) b2=false; }
+      if(a2) p+=40;
+      if(b2) p+=40;
+    }
+    /* 規則4：深色比例 */
+    var dark = 0;
+    for(r=0;r<n;r++) for(c=0;c<n;c++) dark += m[r][c];
+    p += 10 * Math.floor(Math.abs(dark*100/(n*n) - 50) / 5);
+    return p;
+  }
+
+  function placeFormat(n, m, mask){
+    var v = bchFormat(2, mask);   /* 2 = 0b10 = EC level H */
+    var p1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],
+              [7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    var p2 = [[n-1,8],[n-2,8],[n-3,8],[n-4,8],[n-5,8],[n-6,8],[n-7,8],
+              [8,n-8],[8,n-7],[8,n-6],[8,n-5],[8,n-4],[8,n-3],[8,n-2],[8,n-1]];
+    for(var i=0;i<15;i++){
+      var b = (v >> (14-i)) & 1;
+      m[p1[i][0]][p1[i][1]] = b;
+      m[p2[i][0]][p2[i][1]] = b;
+    }
+  }
+  function placeVersion(n, m, ver){
+    if(ver < 7) return;
+    var v = bchVersion(ver);
+    for(var i=0;i<18;i++){
+      var b = (v>>i) & 1, r = (i/3)|0, c = i%3;
+      m[r][n-11+c] = b;
+      m[n-11+c][r] = b;
+    }
+  }
+
+  /* 產生 QR 矩陣（0/1 二維陣列），自動挑最佳 mask */
+  function matrix(text){
+    var bytes = utf8Bytes(String(text));
+    var ver = pickVersion(bytes.length);
+    var cw  = interleave(ver, encodeData(bytes, ver));
+    var base = baseMatrix(ver), n = base.n, m = base.m, fx = base.fx;
+    placeBits(n, m, fx, cw);
+
+    var best = null, bestP = Infinity, mask, r, c, t, p;
+    for(mask=0; mask<8; mask++){
+      t = [];
+      for(r=0;r<n;r++) t.push(Uint8Array.from(m[r]));
+      for(r=0;r<n;r++) for(c=0;c<n;c++)
+        if(!fx[r][c] && MASKS[mask](r,c)) t[r][c] ^= 1;
+      placeFormat(n, t, mask);
+      placeVersion(n, t, ver);
+      p = penalty(t, n);
+      if(p < bestP){ bestP = p; best = t; }
+    }
+    return best;
+  }
+
+  /* 產生 SVG 字串（向量，列印最銳利）。quiet = 靜空區模組數，掃描槍需要 */
+  function svg(text, sizeMm, quiet){
+    if(quiet === undefined) quiet = 2;
+    var m = matrix(text), n = m.length, t = n + quiet*2, d = "", r, c, w;
+    for(r=0;r<n;r++){
+      c = 0;
+      while(c < n){
+        if(!m[r][c]){ c++; continue; }
+        w = 1;
+        while(c+w < n && m[r][c+w]) w++;     /* 同列連續黑格併成一條，SVG 小很多 */
+        d += "M" + (c+quiet) + " " + (r+quiet) + "h" + w + "v1h-" + w + "z";
+        c += w;
+      }
+    }
+    return '<svg width="' + sizeMm + 'mm" height="' + sizeMm + 'mm" viewBox="0 0 ' + t + ' ' + t +
+           '" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">' +
+           '<rect width="' + t + '" height="' + t + '" fill="#fff"/>' +
+           '<path d="' + d + '" fill="#000"/></svg>';
+  }
+
+  return { matrix: matrix, svg: svg };
+})();
+</script>
+<script>
+/* =========================================================================
+   Code 128 一維條碼產生器（subset B）
+   自己實作，無外部相依。輸出 SVG 向量，列印最銳利。
+   一維槍、二維槍都掃得到；條碼可以壓矮，小標籤上比 QR 省空間。
+   只支援 ASCII 32~126（英數與半形符號），中文不行。
+   ========================================================================= */
+var CODE128 = (function(){
+  /* 107 個 pattern（值 0~106），每個字串是 bar/space 交替的寬度，第一個是 bar */
+  var PAT = [
+    "212222","222122","222221","121223","121322","131222","122213","122312",
+    "132212","221213","221312","231212","112232","122132","122231","113222","123122",
+    "123221","223211","221132","221231","213212","223112","312131","311222","321122",
+    "321221","312212","322112","322211","212123","212321","232121","111323",
+    "131123","131321","112313","132113","132311","211313","231113","231311",
+    "112133","112331","132131","113123","113321","133121","313121","211331",
+    "231131","213113","213311","213131","311123","311321","331121","312113",
+    "312311","332111","314111","221411","431111",
+    "111224","111422","121124","121421","141122","141221","112214","112412",
+    "122114","122411","142112","142211","241211","221114","413111","241112","134111",
+    "111242","121142","121241","114212","124112","124211","411212","421112","421211",
+    "212141","214121","412121","111143","111341","131141","114113","114311","411113",
+    "411311","113141","114131","311141","411131","211412","211214","211232","2331112"
+  ];
+  var START_B = 104, STOP = 106;
+  var QUIET = 10;   /* 靜空區：標準要求兩側各 >=10 modules，少了掃描槍讀不到 */
+
+  if(PAT.length !== 107) throw new Error("Code128 pattern 表長度錯誤：" + PAT.length);
+
+  /* 回傳 0/1 module 陣列（不含靜空區） */
+  function encode(text){
+    text = String(text);
+    var vals = [START_B], i, a;
+    for(i=0; i<text.length; i++){
+      a = text.charCodeAt(i);
+      if(a < 32 || a > 126)
+        throw new Error("條碼只能用英數和半形符號，不能有中文：" + text.charAt(i));
+      vals.push(a - 32);
+    }
+    var sum = START_B;
+    for(i=1; i<vals.length; i++) sum += i * vals[i];
+    vals.push(sum % 103);      /* 校驗碼 */
+    vals.push(STOP);
+
+    var mods = [], k, p, m, n, w, isBar;
+    for(k=0; k<vals.length; k++){
+      p = PAT[vals[k]];
+      isBar = true;
+      for(m=0; m<p.length; m++){
+        w = +p.charAt(m);
+        for(n=0; n<w; n++) mods.push(isBar ? 1 : 0);
+        isBar = !isBar;
+      }
+    }
+    return mods;
+  }
+
+  /* 總寬度換算成每個 module 幾 mm —— 太細就掃不到，用來提前警告 */
+  function moduleMm(text, widthMm){
+    return widthMm / (encode(text).length + QUIET*2);
+  }
+
+  /* 條碼 SVG。高度會被拉伸填滿（一維條碼高度不影響解碼） */
+  function svg(text, widthMm, heightMm){
+    var mods = encode(text);
+    var total = mods.length + QUIET*2;
+    var d = "", i = 0, w;
+    while(i < mods.length){
+      if(!mods[i]){ i++; continue; }
+      w = 1;
+      while(i+w < mods.length && mods[i+w]) w++;
+      d += "M" + (i+QUIET) + " 0h" + w + "v100h-" + w + "z";
+      i += w;
+    }
+    return '<svg width="' + widthMm + 'mm" height="' + heightMm + 'mm" viewBox="0 0 ' +
+           total + ' 100" preserveAspectRatio="none" shape-rendering="crispEdges" ' +
+           'xmlns="http://www.w3.org/2000/svg">' +
+           '<rect width="' + total + '" height="100" fill="#fff"/>' +
+           '<path d="' + d + '" fill="#000"/></svg>';
+  }
+
+  return { encode: encode, svg: svg, moduleMm: moduleMm, QUIET: QUIET };
+})();
+</script>
+<script>
+/* =========================================================================
+   姓名貼紙 — 版面產生
+   格子用絕對定位（mm）擺，不用 grid，避免瀏覽器捨入造成累積誤差。
+   ========================================================================= */
+/* 這裡「不放真名」——網頁是公開的，名單靠開頁時去試算表撈。
+   下面只是連不上試算表時，讓畫面不會空白的示範資料。 */
+var DEFAULT_NAMES = [
+  "範例一,日本", "範例二,疫情", "範例三,日本"
+].join("\n");
+/* ===== 名單來源 =====
+   開啟時先去試算表「標籤貼紙」分頁撈最新名單；撈得到就用它，
+   撈不到（沒網路／API 掛了）就退回上面寫死的 DEFAULT_NAMES。
+   → 換一批人只要改試算表，這裡完全不用動。 */
+var API   = "https://script.google.com/macros/s/AKfycbwFy68m0LzFYHILxz89qKQy2TmIHfw2B2_exilrMHKPR_A5ALL6m3GpgRu5yjDKAWwF/exec";
+/* ===== 通行碼 =====
+   這個網頁是公開的（GitHub Pages），所以後台密碼「不寫在原始碼裡」。
+   第一次打開會問一次，之後存在這台電腦的瀏覽器（localStorage），不用再打。
+   換電腦要再輸入一次；輸錯會再問。 */
+var PASS_KEY = "wenChuhuoPass";
+var passMem  = "";                        /* localStorage 不能用時的備援（例如某些沙箱） */
+function getPass(){
+  try { return localStorage.getItem(PASS_KEY) || ""; } catch(e){ return passMem; }
+}
+function setPass(v){
+  passMem = v;
+  try { localStorage.setItem(PASS_KEY, v); } catch(e){}
+}
+function askPass(prompt){
+  var v = window.prompt(prompt || "請輸入穩出貨通行碼（這台電腦只要輸入一次）：", "");
+  v = (v || "").trim();
+  if(v) setPass(v);
+  return v;
+}
+/* 打 API 都走這支：自動帶通行碼，碼不對就再問一次 */
+function api(params, cb, retried){
+  var p = getPass() || askPass();
+  if(!p){ cb({ ok:false, error:"沒有輸入通行碼" }); return; }
+  jsonp(params, function(res){
+    if(!res.ok && !retried && /token|通行碼/.test(String(res.error || ""))){
+      setPass("");
+      if(askPass("通行碼不對，再輸入一次：")){ api(params, cb, true); return; }
+    }
+    cb(res);
+  });
+}
+
+function jsonp(params, cb){
+  var s = document.createElement("script");
+  var name = "jcb" + (jsonp.n = (jsonp.n || 0) + 1);
+  var done = false;
+  function cleanup(){
+    try { delete window[name]; } catch(e){ window[name] = undefined; }
+    if(s.parentNode) s.parentNode.removeChild(s);
+  }
+  window[name] = function(res){ done = true; cleanup(); cb(res || { ok:false, error:"空回應" }); };
+  var q = ["callback=" + name, "token=" + encodeURIComponent(getPass())];
+  for(var k in params) q.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+  s.src = API + "?" + q.join("&");
+  s.onerror = function(){ if(done) return; done = true; cleanup(); cb({ ok:false, error:"連不上伺服器" }); };
+  setTimeout(function(){ if(!done){ done = true; cleanup(); cb({ ok:false, error:"逾時" }); } }, 12000);
+  document.head.appendChild(s);
+}
+
+function $(id){ return document.getElementById(id); }
+function num(id, def){ var v = parseFloat($(id).value); return isNaN(v) ? def : v; }
+function int(id, def){ var v = parseInt($(id).value, 10); return isNaN(v) ? def : v; }
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(m){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[m];
+  });
+}
+function msg(t, color){
+  var el = $("msg");
+  el.textContent = t || "";
+  el.style.color = color || "#333";
+}
+
+/* ---- 快速套用貼紙規格 ---- */
+function preset(cols, rows, cw, ch, ml, mt, gx, gy){
+  $("cols").value = cols; $("rows").value = rows;
+  $("cw").value = cw;     $("ch").value = ch;
+  $("ml").value = ml;     $("mt").value = mt;
+  $("gx").value = gx;     $("gy").value = gy;
+  var maxQr = Math.min(cw, ch) - 5;
+  if(num("qrmm", 24) > maxQr) $("qrmm").value = Math.max(10, Math.round(maxQr*2)/2);
+  var maxBar = ch * 0.45;
+  if(num("barmm", 10) > maxBar) $("barmm").value = Math.max(4, Math.round(maxBar*2)/2);
+  $("nmm").value = suggestNameSize();     /* 換格子尺寸要重算姓名字級 */
+  render();
+}
+
+function readOpt(){
+  return {
+    cols: int("cols", 3),
+    rows: int("rows", 10),
+    cw: num("cw", 70),   ch: num("ch", 29.7),
+    ml: num("ml", 0),    mt: num("mt", 0),
+    gx: num("gx", 0),    gy: num("gy", 0),
+    qrmm: num("qrmm", 24),
+    barmm: num("barmm", 10),
+    nmm: num("nmm", 8),
+    layout: $("layout").value,
+    cutline: $("cutline").value
+  };
+}
+
+/* ---- 名單解析：一行一人，第二欄可自訂編號 ---- */
+function parseList(){
+  var lines = $("list").value.replace(/\r/g, "").split("\n");
+  var prefix = $("prefix").value;
+  var seq = int("startNo", 1);
+  var padLen = int("pad", 3);
+  var out = [], i, t, parts, name, code;
+  for(i=0; i<lines.length; i++){
+    t = lines[i].trim();
+    if(!t) continue;
+    parts = t.split(/[,\t、，]+|\s{2,}/);
+    for(var k=parts.length-1; k>=0; k--){
+      parts[k] = parts[k].trim();
+      if(!parts[k]) parts.splice(k, 1);
+    }
+    if(!parts.length) continue;
+    name = parts[0];
+    /* 後面的欄位自己認：像編號的當編號，短中文的當分類（例「日本」「疫情」），
+       電話和長地址一律忽略 —— 這樣從試算表整段複製貼進來也不會出錯。 */
+    code = null;
+    tag = "";
+    for(k=1; k<parts.length; k++){
+      if(!code && looksLikeCode(parts[k])) code = parts[k];
+      else if(!tag && looksLikeTag(parts[k])) tag = parts[k];
+    }
+    if(!code){
+      code = prefix + padNum(seq, padLen);
+      seq++;
+    }
+    out.push({ name: name, code: code, tag: tag });
+  }
+  return out;
+}
+function looksLikeCode(s){
+  if(!s || s.length > 12) return false;
+  if(!/^[A-Za-z0-9][A-Za-z0-9\-_]*$/.test(s)) return false;  /* 只收英數和 - _ */
+  if(/^\d{8,}$/.test(s)) return false;                       /* 純數字 8 碼以上＝電話 */
+  return true;
+}
+function looksLikeTag(s){
+  if(!s || s.length > 8) return false;                       /* 太長的是地址/門市 */
+  if(/^\d{7,}$/.test(s.replace(/-/g, ""))) return false;     /* 電話 */
+  return true;
+}
+function padNum(n, len){
+  var s = String(n);
+  while(s.length < len) s = "0" + s;
+  return s;
+}
+
+/* ---- 快取：同一個編號印多張時不用重算 ---- */
+var qrCache = {}, barCache = {}, codeWarn = null;
+function qrSvg(text, mm){
+  var k = text + "|" + mm;
+  if(!qrCache[k]){
+    try { qrCache[k] = QR.svg(text, mm); }
+    catch(e){
+      qrCache[k] = '<div style="font-size:2.4mm;color:#c00">QR錯誤</div>';
+      if(!codeWarn) codeWarn = e.message;
+    }
+  }
+  return qrCache[k];
+}
+/* 條碼線太細就掃不到 —— 熱感應/噴墨的實務下限抓 0.25mm */
+function barSvg(text, wMm, hMm){
+  var k = text + "|" + wMm + "|" + hMm;
+  if(!barCache[k]){
+    try {
+      var mw = CODE128.moduleMm(text, wMm);
+      if(mw < 0.25 && !codeWarn)
+        codeWarn = "條碼線寬只有 " + mw.toFixed(2) + "mm（建議 ≥0.25mm）— 把格子加寬或縮短編號";
+      barCache[k] = CODE128.svg(text, wMm, hMm);
+    } catch(e){
+      barCache[k] = '<div style="font-size:2.4mm;color:#c00">' + esc(e.message) + "</div>";
+      if(!codeWarn) codeWarn = e.message;
+    }
+  }
+  return barCache[k];
+}
+
+function cellEl(it, r, c, opt){
+  var d = document.createElement("div");
+  var isBar = (opt.layout === "bar" || opt.layout === "barbig");
+  var centered = (opt.layout === "nameonly" || opt.layout === "noqr");
+  d.className = "cell" + (isBar ? " vert" : (centered ? " center" : ""));
+  d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
+  d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
+  d.style.width  = opt.cw + "mm";
+  d.style.height = opt.ch + "mm";
+  if(opt.cutline === "line" || opt.cutline === "both")
+    d.style.outline = "0.18mm dashed #c8c8c8";
+
+  /* 姓名大字 ＋ 分類小字，同一行。字級掛在 .nmline 上，兩個會一起縮放 */
+  var nameBlock = '<div class="nmline" style="font-size:' + opt.nmm + 'mm">' +
+                  '<span class="nm">' + esc(it.name) + "</span>" +
+                  (it.tag ? '<span class="tg">（' + esc(it.tag) + "）</span>" : "") +
+                  "</div>";
+
+  var h = "";
+  if(isBar){
+    /* 姓名在上、條碼在下 */
+    var bw = Math.max(10, opt.cw - 4.4);
+    h += nameBlock;
+    h += '<div class="bc">' + barSvg(it.code, bw, opt.barmm) + "</div>";
+    if(opt.layout === "bar") h += '<div class="no">' + esc(it.code) + "</div>";
+  } else if(opt.layout === "qr" || opt.layout === "qrbig"){
+    h += '<div class="qr">' + qrSvg(it.code, opt.qrmm) + "</div>";
+    h += '<div class="tx">';
+    if(opt.layout === "qr") h += '<div class="no">' + esc(it.code) + "</div>";
+    h += nameBlock;
+    h += "</div>";
+  } else {
+    h += '<div class="tx">';
+    if(opt.layout === "noqr") h += '<div class="no">' + esc(it.code) + "</div>";
+    h += nameBlock;
+    h += "</div>";
+  }
+  d.innerHTML = h;
+  return d;
+}
+
+/* 條碼版面在矮格子（例如精臣 40×20）會塞不下：先壓條碼高度，再縮字級 */
+function usedH(cell, gap){
+  var kids = cell.children, h = 0, i;
+  for(i=0; i<kids.length; i++) h += kids[i].getBoundingClientRect().height;
+  return h + gap * Math.max(0, kids.length - 1);
+}
+function fitVert(){
+  var cells = document.querySelectorAll(".cell.vert"), i;
+  for(i=0; i<cells.length; i++){
+    var cell = cells[i];
+    var cs = getComputedStyle(cell);
+    var avail = cell.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var gap = parseFloat(cs.rowGap) || 0;
+    var svg = cell.querySelector(".bc svg");
+    var nm  = cell.querySelector(".nmline");
+    var guard = 0, h, s;
+    while(usedH(cell, gap) > avail + 0.5 && guard < 80){
+      guard++;
+      h = svg ? parseFloat(svg.getAttribute("height")) : 0;
+      if(svg && h > 5){                       /* 條碼低於 5mm 就不好掃了，先降到這 */
+        svg.setAttribute("height", (h - 0.4) + "mm");
+      } else if(nm){
+        s = parseFloat(nm.style.fontSize);
+        if(s <= 3) break;
+        nm.style.fontSize = (s - 0.3) + "mm";
+      } else break;
+    }
+    if(usedH(cell, gap) > avail + 0.5 && !codeWarn)
+      codeWarn = "格子太矮，條碼＋編號＋姓名塞不下 —— 改用「上條碼 ＋ 下姓名大字」少印一行編號，" +
+                 "或把「條碼高 mm」調小";
+  }
+}
+
+/* 名字太長就自動縮字級，不讓它被切掉 */
+function fitNames(opt){
+  var els = document.querySelectorAll(".cell .nmline"), i, el, size, guard;
+  for(i=0; i<els.length; i++){
+    el = els[i];
+    size = parseFloat(el.style.fontSize) || opt.nmm;
+    guard = 0;
+    while(el.scrollWidth > el.clientWidth + 1 && size > 2.5 && guard < 60){
+      size -= 0.3;
+      el.style.fontSize = size + "mm";
+      guard++;
+    }
+  }
+}
+
+/* 邊緣裁切標記：每條切割線的兩端各畫一小段。
+   切的時候拿長尺把兩端標記連起來，一刀劃過就好，不用沿著格線慢慢對。
+   標記從紙緣往內 3.5mm 才開始畫 —— L6490 最外圈約 3mm 印不到，畫在最邊緣會被吃掉。 */
+function cropMarks(sheet, opt){
+  if(opt.cutline !== "mark" && opt.cutline !== "both") return;
+  var IN = 3.5, LEN = 5, A4W = 210, A4H = 297, c, r, x, y;
+  function mark(css){
+    var d = document.createElement("div");
+    d.style.cssText = "position:absolute;" + css;
+    sheet.appendChild(d);
+  }
+  for(c = 1; c < opt.cols; c++){
+    x = opt.ml + c*opt.cw + (c-1)*opt.gx + opt.gx/2;
+    mark("left:"+x+"mm;top:"+IN+"mm;width:0;height:"+LEN+"mm;border-left:0.3mm solid #333");
+    mark("left:"+x+"mm;top:"+(A4H-IN-LEN)+"mm;width:0;height:"+LEN+"mm;border-left:0.3mm solid #333");
+  }
+  for(r = 1; r < opt.rows; r++){
+    y = opt.mt + r*opt.ch + (r-1)*opt.gy + opt.gy/2;
+    mark("top:"+y+"mm;left:"+IN+"mm;height:0;width:"+LEN+"mm;border-top:0.3mm solid #333");
+    mark("top:"+y+"mm;left:"+(A4W-IN-LEN)+"mm;height:0;width:"+LEN+"mm;border-top:0.3mm solid #333");
+  }
+}
+
+function render(){
+  var people = parseList();
+  if(!people.length){ msg("名單是空的，先在上面貼姓名", "#c00"); return; }
+
+  var copies = int("copies", 1);
+  var items = [], i, c;
+  for(i=0; i<people.length; i++)
+    for(c=0; c<copies; c++) items.push(people[i]);
+
+  var opt = readOpt();
+  codeWarn = null;
+  var perPage = opt.cols * opt.rows;
+  var skip = Math.max(0, int("skip", 1) - 1);
+  var pages = Math.ceil((skip + items.length) / perPage) || 1;
+
+  var out = $("out");
+  out.innerHTML = "";
+  for(var p=0; p<pages; p++){
+    var sheet = document.createElement("div");
+    sheet.className = "sheet";
+    for(var r=0; r<opt.rows; r++){
+      for(var cc=0; cc<opt.cols; cc++){
+        var slot = p*perPage + r*opt.cols + cc;
+        if(slot < skip) continue;
+        var it = items[slot - skip];
+        if(!it) continue;
+        sheet.appendChild(cellEl(it, r, cc, opt));
+      }
+    }
+    cropMarks(sheet, opt);
+    out.appendChild(sheet);
+  }
+  fitNames(opt);
+  fitVert();
+
+  var over = opt.ml + opt.cols*opt.cw + (opt.cols-1)*opt.gx;
+  var overY = opt.mt + opt.rows*opt.ch + (opt.rows-1)*opt.gy;
+  if(over > 210.5 || overY > 297.5){
+    msg("⚠ 格子總尺寸超出 A4（" + over.toFixed(1) + " × " + overY.toFixed(1) +
+        " mm），最外圈會被切掉，檢查欄列數或格子尺寸", "#c00");
+  } else if(codeWarn){
+    msg("已產生 " + items.length + " 張，但 ⚠ " + codeWarn, "#c26a00");
+  } else {
+    msg("已產生 " + items.length + " 張，共 " + pages + " 頁", "#00913A");
+  }
+}
+
+/* ---- 對位測試頁：拿普通白紙印，疊在貼紙上對光看 ---- */
+function testPage(){
+  var opt = readOpt();
+  var out = $("out");
+  out.innerHTML = "";
+  var sheet = document.createElement("div");
+  sheet.className = "sheet";
+  var n = 1;
+  for(var r=0; r<opt.rows; r++){
+    for(var c=0; c<opt.cols; c++){
+      var d = document.createElement("div");
+      d.className = "cell center";
+      d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
+      d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
+      d.style.width  = opt.cw + "mm";
+      d.style.height = opt.ch + "mm";
+      d.style.border = "0.25mm dashed #cc0000";
+      d.innerHTML =
+        '<div class="tx" style="align-items:center;text-align:center">' +
+          '<div style="font-size:4mm;font-weight:700;color:#cc0000">' + n + "</div>" +
+          '<div style="font-size:2.5mm;color:#777">' + opt.cw + " × " + opt.ch + " mm</div>" +
+        "</div>";
+      sheet.appendChild(d);
+      n++;
+    }
+  }
+  /* 四角定位標，用來確認整張沒有被縮放 */
+  var marks = [[5,5],[205,5],[5,292],[205,292]];
+  for(var m=0; m<marks.length; m++){
+    var x = document.createElement("div");
+    x.style.cssText = "position:absolute;left:" + (marks[m][0]-2) + "mm;top:" +
+      (marks[m][1]-2) + "mm;width:4mm;height:4mm;border:0.3mm solid #0a0;" +
+      "border-radius:50%";
+    sheet.appendChild(x);
+  }
+  var ruler = document.createElement("div");
+  ruler.style.cssText = "position:absolute;left:55mm;top:150mm;width:100mm;height:6mm;" +
+    "border:0.3mm solid #0a0;font-size:3mm;color:#0a0;text-align:center;" +
+    "line-height:6mm;font-weight:700;background:#fff";
+  ruler.textContent = "這個框實際量起來要剛好 100 mm 寬";
+  sheet.appendChild(ruler);
+
+  out.appendChild(sheet);
+  msg("對位測試頁好了 — 用普通白紙印一張，量綠框是不是 100mm，再疊到貼紙上對光看", "#c26a00");
+}
+
+function doPrint(){
+  if(!$("out").children.length){ msg("先按「產生貼紙」", "#c00"); return; }
+  window.print();
+}
+
+
+/* ---- 版面切換時給個合適的預設字級 ---- */
+function onLayoutChange(){
+  $("nmm").value = suggestNameSize();
+  render();
+}
+/* 姓名「盡量大」：依格子高度算一個起始字級，render 之後 fitNames/fitVert
+   會再自動縮到剛好塞得下 —— 所以這裡可以放心開大。 */
+function suggestNameSize(){
+  var ch = num("ch", 29.7), v = $("layout").value, s;
+  if(v === "nameonly")    s = Math.min(22, ch * 0.58);
+  else if(v === "barbig") s = Math.min(16, ch * 0.44);
+  else if(v === "bar")    s = Math.min(13, ch * 0.34);
+  else if(v === "qrbig")  s = Math.min(13, ch * 0.36);
+  else if(v === "noqr")   s = Math.min(15, ch * 0.40);
+  else                    s = Math.min(11, ch * 0.30);
+  return Math.round(s * 2) / 2;
+}
+
+window.addEventListener("DOMContentLoaded", function(){
+  if(!$("list").value.trim()) $("list").value = DEFAULT_NAMES;
+  $("layout").addEventListener("change", onLayoutChange);
+  var ids = ["cols","rows","cw","ch","ml","mt","gx","gy","qrmm","barmm","nmm","skip",
+             "copies","prefix","startNo","pad","cutline"];
+  for(var i=0; i<ids.length; i++)
+    $(ids[i]).addEventListener("change", render);
+  $("nmm").value = suggestNameSize();      /* 一開啟就用最大可用字級 */
+  render();
+
+  /* 去試算表撈最新名單（撈不到就維持內建的，不影響使用） */
+  msg("正在跟試算表要最新名單…", "#0f6fe0");
+  api({ action: "roster" }, function(res){
+    if(!res.ok || !res.data || !res.data.length){
+      msg("⚠ 連不上試算表，用的是內建名單（" + (res.error || "沒有資料") + "）", "#c26a00");
+      return;
+    }
+    var lines = [];
+    for(var i = 0; i < res.data.length; i++){
+      var p = res.data[i];
+      lines.push(p.name + "," + (p.tag || "") + "," + (p.code || ""));
+    }
+    $("list").value = lines.join("\n");
+    render();
+    msg("✅ 已從試算表載入 " + res.count + " 人", "#00913A");
+  });
+});
+</script>
+</body>
+</html>

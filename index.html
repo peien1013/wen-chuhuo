@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>穩出貨</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+:root{
+  --ink:#1a1a1a; --line:#dcdfe4; --bg:#f2f4f7; --card:#fff;
+  --p1:#7b3fd4;  /* 姓名貼紙 紫 */
+  --p2:#00913A;  /* 核對 郵政綠 */
+  --p3:#F07000;  /* 出貨系統 7-11 橘 */
+  --p4:#0F6FE0;  /* 試算表 全家藍 */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:0 20px 70px}
+
+/* ---- 滿版主視覺（banner.png，1920×640，跟這個 HTML 放同一層）----
+   換圖只要換掉 banner.png。圖載不到會自動退回漸層底，不會變空白。 */
+.hero{
+  margin:0 -20px 28px;position:relative;overflow:hidden;
+  aspect-ratio:1920/640;            /* 完整展開，不裁切 */
+  display:flex;flex-direction:column;justify-content:flex-start;align-items:center;
+  padding-top:5.5%;text-align:center;color:#fff;
+  background:linear-gradient(125deg,#7b3fd4 0%,#0F6FE0 45%,#00913A 100%);
+  background-image:url("banner.png"),linear-gradient(125deg,#7b3fd4 0%,#0F6FE0 45%,#00913A 100%);
+  background-size:cover;background-position:center;background-repeat:no-repeat}
+/* 上半部壓一層由深到透的遮罩，標題才壓得住底圖 */
+.hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(20,10,40,.42) 0%,rgba(20,10,40,.14) 45%,transparent 72%)}
+.hero .htxt{position:relative;z-index:1}
+.hero h1{font-size:62px;margin:0 0 8px;letter-spacing:10px;font-weight:900;
+  text-shadow:0 3px 18px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.6)}
+.hero p{font-size:19px;margin:0;letter-spacing:3px;font-weight:700;
+  text-shadow:0 2px 10px rgba(0,0,0,.55)}
+@media (max-width:700px){
+  .hero h1{font-size:34px;letter-spacing:5px}
+  .hero p{font-size:14px;letter-spacing:1px}
+}
+
+h1{font-size:34px;margin:0 0 6px;letter-spacing:1px}
+.sub{color:#666;font-size:17px;margin:0 0 30px;line-height:1.7}
+
+/* ---- 流程條 ---- */
+/* 流程：每一步一個浮框，三個主步驟用對應卡片的顏色，整排置中 */
+.flow{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  margin:0 0 30px;padding:0}
+.fchip{display:inline-flex;align-items:center;padding:10px 20px;border-radius:26px;
+  font-size:16px;font-weight:800;background:#fff;border:2px solid #e2e5ea;color:#777;
+  box-shadow:0 3px 10px rgba(0,0,0,.07);white-space:nowrap}
+.fchip.s1{border-color:var(--p1);color:var(--p1);background:#f8f4ff;
+  box-shadow:0 3px 12px rgba(123,63,212,.18)}
+.fchip.s2{border-color:var(--p2);color:var(--p2);background:#f0faf3;
+  box-shadow:0 3px 12px rgba(0,145,58,.18)}
+.fchip.s3{border-color:var(--p3);color:var(--p3);background:#fff6ee;
+  box-shadow:0 3px 12px rgba(240,112,0,.18)}
+.flow .ar{color:#c5c9d0;font-size:17px;font-weight:900}
+@media (max-width:760px){ .fchip{font-size:14px;padding:8px 14px} }
+
+/* ---- 卡片 ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
+  border:2px solid var(--line);border-radius:18px;padding:24px 24px 22px;
+  transition:.16s;position:relative;overflow:hidden}
+a.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.12)}
+a.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--c)}
+a.card .step{display:inline-block;font-size:13px;font-weight:800;color:#fff;
+  background:var(--c);padding:3px 12px;border-radius:20px;letter-spacing:1px}
+a.card .ico{font-size:44px;line-height:1;margin:14px 0 10px}
+a.card h2{font-size:23px;margin:0 0 8px;letter-spacing:.5px}
+a.card p{font-size:15px;line-height:1.75;color:#666;margin:0}
+a.card .where{margin-top:14px;font-size:13px;color:#999;
+  border-top:1px dashed #e2e4e8;padding-top:10px}
+a.card:hover{border-color:var(--c)}
+
+/* ⓘ 說明鈕：卡片平常只留步驟／圖示／標題，要看細節才點它 */
+.cardwrap{position:relative;display:flex}
+.cardwrap > a.card{flex:1 1 auto}
+.info{position:absolute;right:16px;top:16px;width:30px;height:30px;padding:0;
+  border-radius:50%;border:2px solid var(--c);background:#fff;color:var(--c);
+  font-size:18px;font-weight:900;line-height:1;cursor:pointer;z-index:3;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+  font-family:inherit}
+.info:hover{background:var(--c);color:#fff;transform:scale(1.14)}
+.info.open{background:var(--c);color:#fff}
+a.card .desc{margin-top:14px;padding-top:12px;border-top:1px dashed #e2e4e8}
+a.card .desc p{margin:0;font-size:15px;line-height:1.75;color:#666}
+a.card .desc .where{margin-top:10px;border-top:0;padding-top:0}
+a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以整行都能用 */
+
+/* ---- 編輯卡片 ---- */
+.tools{display:flex;align-items:center;gap:12px;margin-top:20px}
+.tbtn{font-size:15px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:#555;font-family:inherit;transition:.15s}
+.tbtn:hover{border-color:#7b3fd4;color:#7b3fd4}
+.tbtn.primary{background:#7b3fd4;border-color:#7b3fd4;color:#fff}
+.tbtn.primary:hover{filter:brightness(1.1);color:#fff}
+.tbtn.danger:hover{border-color:#c00;color:#c00}
+.dlgbtns .sp{flex:1 1 auto}
+#cardsNote{font-size:14px;color:#8a8f96}
+.mask{position:fixed;inset:0;background:rgba(20,15,35,.5);z-index:99;
+  display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
+/* ⚠ 一定要有這行：CSS 的 display 會蓋掉 HTML 的 hidden 屬性，
+   少了它遮罩會一直蓋在整個畫面上，卡片就點不到了 */
+.mask[hidden]{display:none}
+.dlg{background:#fff;border-radius:16px;padding:26px 28px;max-width:900px;width:100%;
+  box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.dlg h3{margin:0 0 6px;font-size:22px}
+.dlgsub{margin:0 0 18px;font-size:14px;color:#777;line-height:1.7}
+.erow{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.erow .eh{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-size:15px}
+.erow .dot{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.egrid{display:grid;grid-template-columns:90px 1fr 110px;gap:10px;align-items:center}
+.egrid label{font-size:13px;color:#666;font-weight:700}
+.egrid input,.egrid textarea{width:100%;font-size:15px;padding:8px 10px;
+  border:1px solid #ccc;border-radius:8px;font-family:inherit}
+.egrid textarea{grid-column:2 / span 2;min-height:56px;resize:vertical}
+.egrid .wide{grid-column:2 / span 2}
+.dlgbtns{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+/* ── 名單來源區 ── 字都放大，因為要給長輩看 ── */
+.src{margin-top:34px;background:#fff8e8;border:1px solid #f0d089;
+  border-radius:14px;padding:20px 24px 22px}
+.src h3{margin:0 0 12px;font-size:22px;color:#c26a00}
+.srcnow{font-size:19px;font-weight:800;color:#111;line-height:1.7;
+  background:#fff;border:1px solid #ecd7a8;border-radius:10px;padding:12px 16px}
+.srcnow .big{font-size:22px;color:#c26a00}
+.srcnow .cols{display:block;margin-top:6px;font-size:15px;font-weight:600;color:#8a7a5c}
+/* 「要改這裡」紅粗框 —— 現在框的是「貼網址」那一行 */
+.mustedit{display:block;border:3px solid #d10000;border-radius:12px;
+  background:#fff;padding:16px 18px 14px;margin:16px 0 12px;position:relative;
+  box-shadow:0 3px 12px rgba(209,0,0,.13)}
+.metag{display:inline-block;background:#d10000;color:#fff;font-size:13px;font-weight:900;
+  padding:4px 12px;border-radius:20px;letter-spacing:1px}
+.melead{margin:10px 0 10px;font-size:17px;font-weight:800;color:#111}
+.srcrow{display:flex;gap:10px;flex-wrap:wrap}
+.srcrow input{font-size:17px;padding:11px 13px;border:2px solid #c9c9c9;
+  border-radius:9px;font-family:inherit}
+.srcrow input:focus{outline:none;border-color:#7b3fd4}
+#srcUrl{flex:1 1 380px;min-width:0}
+#srcSheet{flex:0 0 150px}
+.tbtn.big{font-size:18px;font-weight:800;padding:11px 26px}
+.srcmsg{margin-top:10px;font-size:17px;font-weight:800;line-height:1.6}
+.srcmsg:empty{display:none}
+.srcback{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.srchint{font-size:14px;color:#8a8f96}
+.srchelp{font-size:16px;line-height:1.9;border-top:1px dashed #e0c895;padding-top:12px;margin-top:4px}
+.srchelp>summary{cursor:pointer;font-size:18px;font-weight:800;color:#c26a00;
+  list-style:none;padding:6px 0;user-select:none}
+.srchelp>summary::-webkit-details-marker{display:none}
+.srchelp>summary::before{content:"▸ "}
+.srchelp[open]>summary::before{content:"▾ "}
+.srchelpin{padding-top:8px}
+.srchelp b{color:#c26a00}
+table.demo{border-collapse:collapse;margin:12px 0 14px;background:#fff;font-size:16px}
+table.demo th,table.demo td{border:1px solid #d8c39a;padding:7px 16px;text-align:center}
+table.demo th{background:#f5e6c8;font-weight:800;color:#7a5c1c}
+ul.cols{margin:8px 0 12px;padding-left:24px}
+ul.cols li{margin-bottom:5px}
+.dim{color:#8a8f96}
+.foot{margin-top:26px;font-size:14px;color:#8a8f96;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="htxt">
+      <h1>穩出貨</h1>
+      <p>貼紙 · 掃碼 · 寄件，一條龍不漏單</p>
+    </div>
+  </div>
+
+
+  <div class="flow">
+    <span class="fchip s1">① 印姓名貼紙</span><span class="ar">→</span>
+    <span class="fchip">貼在商品上</span><span class="ar">→</span>
+    <span class="fchip s2">② 掃條碼核對</span><span class="ar">→</span>
+    <span class="fchip">裝箱</span><span class="ar">→</span>
+    <span class="fchip s3">③ 產郵寄標籤</span><span class="ar">→</span>
+    <span class="fchip">貼箱子拿去寄</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       要改卡片的話，動下面這四塊就好，每張卡片有 6 個可改的地方：
+
+         style="--c:var(--p4)"   這張卡的顏色（p1紫 p2綠 p3橘 p4藍）
+         href="..."              點下去要去哪
+                                   · 本機檔案 → 相對路徑，例 姓名貼紙/姓名貼紙.html
+                                   · 線上網址 → 完整 https://...
+         <span class="step">     左上角小標籤（第 1 步／資料／隨你寫）
+         <div class="ico">       大圖示，直接換 emoji
+         <h2>                    標題（卡片上看得到的字）
+         <p> 和 .where           說明，收在 ⓘ 裡，卡片上看不到
+
+       target="_blank" 加了就開新分頁。**線上的系統不要加**，
+       因為加了就沒有「上一頁」，那邊的「← 回穩出貨」會失效。
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="cards" id="cards"></div>
+
+  <div class="tools">
+    <button type="button" class="tbtn" onclick="openEdit()">⚙ 編輯卡片</button>
+    <span id="cardsNote"></span>
+  </div>
+
+  <div id="editMask" class="mask" hidden onclick="if(event.target===this) closeEdit()">
+    <div class="dlg">
+      <h3>⚙ 編輯卡片</h3>
+      <p class="dlgsub">改完按「儲存」。設定存在這台電腦的瀏覽器裡，不會動到原始檔案。</p>
+      <div id="editRows"></div>
+      <div class="dlgbtns">
+        <button type="button" class="tbtn primary" onclick="saveCards()">儲存</button>
+        <button type="button" class="tbtn" onclick="closeEdit()">取消</button>
+        <span class="sp"></span>
+        <button type="button" class="tbtn" onclick="exportCards()">複製設定</button>
+        <button type="button" class="tbtn" onclick="importCards()">貼上設定</button>
+        <button type="button" class="tbtn danger" onclick="resetCards()">還原預設</button>
+      </div>
+      <p class="dlgsub" style="margin-top:14px">
+        <b>換一批商品時</b>：通常只要改第 4 張的「網址」和「標題」。<br>
+        <b>換電腦</b>：在這台按「複製設定」，到那台按「貼上設定」。
+      </p>
+    </div>
+  </div>
+  <div class="src">
+    <h3>📋 這批要出貨的名單</h3>
+    <div class="srcnow" id="srcNow">讀取中…</div>
+
+    <div class="mustedit">
+      <span class="metag">要換名單，就改這裡</span>
+      <div class="melead">把新的試算表網址整條貼進來，按「換過去」就好：</div>
+      <div class="srcrow">
+        <input id="srcUrl" type="text" placeholder="https://docs.google.com/spreadsheets/d/……">
+        <input id="srcSheet" type="text" placeholder="分頁名稱" title="要讀哪一個分頁；留空就用第一個分頁">
+        <button type="button" class="tbtn primary big" onclick="applySource()">換過去</button>
+      </div>
+      <div class="srcmsg" id="srcMsg"></div>
+    </div>
+
+    <div class="srcback">
+      <button type="button" class="tbtn" onclick="resetSource()">↩ 換回原本那份（2026靈芝蟲草登記）</button>
+      <span class="srchint">換一次就好，兩台電腦都會跟著換。</span>
+    </div>
+
+    <details class="srchelp">
+      <summary>❓ 那份試算表要長什麼樣子？　<span class="dim">（點一下打開）</span></summary>
+      <div class="srchelpin">
+        第一列是標題，<b>欄位順序不用跟我一樣</b>，程式會自己去認：
+        <table class="demo">
+          <tr><th>姓名</th><th>分類</th><th>編號</th><th>通路</th><th>同箱</th></tr>
+          <tr><td>王小明</td><td>疫情</td><td>S001</td><td>i郵箱</td><td>王小明</td></tr>
+          <tr><td>李美美</td><td>日本</td><td>S002</td><td>7-ELEVEN</td><td>王小明</td></tr>
+        </table>
+        <ul class="cols">
+          <li><b>姓名</b>　貼紙上印的大字。<b>一定要有。</b></li>
+          <li><b>分類</b>　跟在名字旁邊的小字，例「疫情」「日本」。沒有就留空白。</li>
+          <li><b>編號</b>　條碼裡面的內容。<b>沒有這欄也沒關係</b>，程式會自動幫你編 S001、S002⋯</li>
+          <li><b>通路</b>　i郵箱／7-ELEVEN／全家。掃碼核對頁靠這欄分左中右三排。</li>
+          <li><b>同箱</b>　這個人的東西要放進<b>誰的箱子</b>（通常寫箱主的名字）。</li>
+        </ul>
+        標題不用一字不差，這些字都認得：姓名/名字/訂購人、分類/類別/團別/品項、編號/代號/序號/條碼、
+        通路/超商/物流、同箱/箱主/收件人。<br>
+        ⚠ <b>通路欄不要寫「7-11」</b>，Google 試算表會把它吃成日期 2026/7/11，請寫 <b>7-ELEVEN</b>。<br>
+        試算表改完存檔就好，<b>姓名貼紙頁</b>和<b>掃碼核對頁</b>下次打開自動撈最新的，程式碼完全不用碰。<br>
+        <span class="dim">（沒網路時會自動用內建的舊名單，畫面上會標示，不會卡住。）</span>
+      </div>
+    </details>
+  </div>
+
+  <p class="foot" id="foot">
+    掃描槍 AURORA XB-G20（二維，條碼 QR 都能掃）· 印表機 Epson L6490（A4／縮放 100%／邊界無）。
+  </p>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   四張卡片的資料。畫面上按「⚙ 編輯卡片」就能改，改完存在瀏覽器裡
+   （localStorage），不會動到這個檔案。要回原始設定按「還原預設」。
+   blank:true = 開新分頁。**線上系統要設 false**，
+   否則沒有「上一頁」，那邊的「← 回穩出貨」會失效。
+   ══════════════════════════════════════════════════════════════ */
+var DEFAULT_CARDS = [
+  { c:"p1", step:"第 1 步", ico:"🏷️", title:"姓名貼紙產生器",
+    href:"sticker.html", blank:false,
+    desc:"印出「姓名＋分類＋條碼」的貼紙，<b>貼在商品上</b>，讓一箱裝好幾個人的貨也不會拿錯。A4 三欄八列、附裁切線。",
+    where:"線上網頁 · sticker.html" },
+  { c:"p2", step:"第 2 步", ico:"🔫", title:"出貨核對（掃條碼）",
+    href:"check.html", blank:false,
+    desc:"拿掃描槍掃商品上的貼紙，畫面立刻顯示<b>是誰、走哪個通路、要放進誰的箱子</b>。少掃、重複掃都會擋下來，紀錄即時寫進試算表。",
+    where:"線上網頁 · check.html" },
+  { c:"p3", step:"第 3 步", ico:"🚚", title:"出貨作業系統",
+    href:"https://script.google.com/macros/s/AKfycbwo5mwyvjcXiMZKPGhbyg0NSaUZnOoSInmhZJZH3MGI5-ZOv2fVC3F5JYZ78IJRsU5x/exec", blank:false,
+    desc:"貼在<b>箱子外面</b>的郵寄標籤。貼上收件人名單 → 產各家匯入檔 → 上傳 i郵箱／7-ELEVEN／全家後台列印。",
+    where:"Google Apps Script · 需登入 peien1013@gmail.com" },
+  { c:"p4", step:"資料", ico:"📊", title:"2026靈芝蟲草登記",
+    href:"https://docs.google.com/spreadsheets/d/10SbHfrNyisO6iFUrcSKr8hgMnAFenjMybY0VPNE1t5o/edit", blank:true,
+    desc:"名單的源頭。<b>標籤貼紙</b>分頁＝42 人的姓名／分類／編號／通路；<b>郵寄出貨</b>分頁＝25 箱的收件人與門市。",
+    where:"Google 試算表" }
+];
+var CARDS_KEY = "wenChuhuoCards_v1";
+var CARDS = [];
+
+function loadCards(){
+  try {
+    var s = localStorage.getItem(CARDS_KEY);
+    if(s){
+      var arr = JSON.parse(s);
+      if(arr && arr.length){ CARDS = arr; return true; }
+    }
+  } catch(e){}
+  CARDS = JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  return false;
+}
+
+function escHtml(s){
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function(m){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[m];
+  });
+}
+
+function renderCards(){
+  var box = document.getElementById("cards");
+  box.innerHTML = "";
+  CARDS.forEach(function(d){
+    var wrap = document.createElement("div");
+    wrap.className = "cardwrap";
+
+    var a = document.createElement("a");
+    a.className = "card";
+    a.style.setProperty("--c", "var(--" + (d.c || "p1") + ")");
+    a.href = d.href || "#";
+    if(d.blank){ a.target = "_blank"; a.rel = "noopener"; }
+    a.innerHTML =
+      '<span class="step">' + escHtml(d.step) + "</span>" +
+      '<div class="ico">' + escHtml(d.ico) + "</div>" +
+      "<h2>" + escHtml(d.title) + "</h2>";
+
+    /* 說明收在 ⓘ 裡；desc 允許 <b> 之類的標籤所以不 escape */
+    var info = document.createElement("div");
+    info.className = "desc";
+    info.hidden = true;
+    info.innerHTML = "<p>" + (d.desc || "") + "</p>" +
+      (d.where ? '<div class="where">' + escHtml(d.where) + "</div>" : "");
+    a.appendChild(info);
+    wrap.appendChild(a);
+
+    /* ⚠ button 一定要放在 <a> 外面，巢狀互動元素會把連結點擊弄壞 */
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "info";
+    btn.textContent = "!";
+    btn.title = "看說明";
+    btn.addEventListener("click", function(e){
+      e.preventDefault(); e.stopPropagation();
+      var open = info.hidden;
+      info.hidden = !open;
+      btn.classList.toggle("open", open);
+      btn.title = open ? "收起說明" : "看說明";
+    });
+    wrap.appendChild(btn);
+    box.appendChild(wrap);
+  });
+}
+
+/* ---- 編輯面板 ---- */
+function openEdit(){
+  var rows = document.getElementById("editRows");
+  rows.innerHTML = "";
+  CARDS.forEach(function(d, i){
+    var el = document.createElement("div");
+    el.className = "erow";
+    el.style.setProperty("--c", "var(--" + (d.c || "p1") + ")");
+    el.innerHTML =
+      '<div class="eh"><span class="dot"></span>第 ' + (i + 1) + ' 張</div>' +
+      '<div class="egrid">' +
+        '<label>圖示／標籤</label>' +
+        '<input class="ei" data-k="ico" value="' + escHtml(d.ico) + '" placeholder="emoji">' +
+        '<input class="ei" data-k="step" value="' + escHtml(d.step) + '" placeholder="第 1 步">' +
+        '<label>標題</label><input class="ei wide" data-k="title" value="' + escHtml(d.title) + '">' +
+        '<label>網址</label><input class="ei wide" data-k="href" value="' + escHtml(d.href) + '">' +
+        '<label>說明</label><textarea class="ei" data-k="desc">' + escHtml(d.desc) + '</textarea>' +
+        '<label>來源標註</label><input class="ei wide" data-k="where" value="' + escHtml(d.where) + '">' +
+      "</div>";
+    rows.appendChild(el);
+  });
+  document.getElementById("editMask").hidden = false;
+}
+function closeEdit(){ document.getElementById("editMask").hidden = true; }
+
+function saveCards(){
+  var rows = document.querySelectorAll("#editRows .erow");
+  for(var i = 0; i < rows.length; i++){
+    var inputs = rows[i].querySelectorAll(".ei");
+    for(var j = 0; j < inputs.length; j++){
+      CARDS[i][inputs[j].getAttribute("data-k")] = inputs[j].value;
+    }
+  }
+  var saved = true;
+  try { localStorage.setItem(CARDS_KEY, JSON.stringify(CARDS)); }
+  catch(e){ saved = false; }
+  if(!saved){
+    alert("改動已經套用到畫面上了，但這個瀏覽器不讓網頁保存設定，" +
+          "所以關掉頁面就會恢復原狀。\n\n" +
+          "要永久保存的話：按下面的「複製設定」，把複製到的那串貼給 Claude，" +
+          "我幫你直接寫回檔案，以後打開就是新的。");
+  }
+  renderCards(); markCustom(); closeEdit();
+}
+function resetCards(){
+  if(!window.confirm("要把四張卡片還原成原始設定嗎？你改過的內容會消失。")) return;
+  try { localStorage.removeItem(CARDS_KEY); } catch(e){}
+  loadCards(); renderCards(); markCustom(); closeEdit();
+}
+function exportCards(){
+  var txt = JSON.stringify(CARDS);
+  try {
+    navigator.clipboard.writeText(txt);
+    alert("設定已複製。到另一台電腦按「貼上設定」就會一模一樣。");
+  } catch(e){ window.prompt("複製這段：", txt); }
+}
+function importCards(){
+  var s = window.prompt("把另一台複製的設定貼進來：");
+  if(!s) return;
+  try {
+    var arr = JSON.parse(s);
+    if(!(arr instanceof Array) || !arr.length) throw new Error("格式不對");
+    CARDS = arr;
+    try { localStorage.setItem(CARDS_KEY, JSON.stringify(CARDS)); } catch(e2){}
+    renderCards(); markCustom(); closeEdit();
+    alert("已套用。");
+  } catch(e){ alert("貼上的內容看不懂：" + e.message); }
+}
+function markCustom(){
+  var custom = false;
+  try { custom = !!localStorage.getItem(CARDS_KEY); } catch(e){}
+  document.getElementById("cardsNote").textContent =
+    custom ? "（目前用的是你改過的設定）" : "";
+}
+
+loadCards();
+renderCards();
+markCustom();
+
+/* ══════════════════════════════════════════════════════════════
+   名單來源：貼一個試算表網址就換整批名單。
+   設定存在 Apps Script 那邊（ScriptProperties），不是瀏覽器，
+   所以換一次，兩台電腦都跟著換。
+   file:// 頁面 fetch 會被 CORS 擋死，只有 <script> 能跨網域 → 用 JSONP。
+   ══════════════════════════════════════════════════════════════ */
+var API   = "https://script.google.com/macros/s/AKfycbwFy68m0LzFYHILxz89qKQy2TmIHfw2B2_exilrMHKPR_A5ALL6m3GpgRu5yjDKAWwF/exec";
+/* ===== 通行碼 =====
+   這個網頁是公開的（GitHub Pages），所以後台密碼「不寫在原始碼裡」。
+   第一次打開會問一次，之後存在這台電腦的瀏覽器（localStorage），不用再打。
+   換電腦要再輸入一次；輸錯會再問。 */
+var PASS_KEY = "wenChuhuoPass";
+var passMem  = "";
+function getPass(){
+  try { return localStorage.getItem(PASS_KEY) || ""; } catch(e){ return passMem; }
+}
+function setPass(v){
+  passMem = v;
+  try { localStorage.setItem(PASS_KEY, v); } catch(e){}
+}
+function askPass(prompt){
+  var v = window.prompt(prompt || "請輸入穩出貨通行碼（這台電腦只要輸入一次）：", "");
+  v = (v || "").trim();
+  if(v) setPass(v);
+  return v;
+}
+/* 打 API 都走這支：自動帶通行碼，碼不對就再問一次 */
+function api(params, cb, retried){
+  var p = getPass() || askPass();
+  if(!p){ cb({ ok:false, error:"沒有輸入通行碼" }); return; }
+  jsonp(params, function(res){
+    if(!res.ok && !retried && /token|通行碼/.test(String(res.error || ""))){
+      setPass("");
+      if(askPass("通行碼不對，再輸入一次：")){ api(params, cb, true); return; }
+    }
+    cb(res);
+  });
+}
+var jsonpN = 0;
+
+function jsonp(params, cb){
+  var name = "__wc" + (++jsonpN) + "_" + String(jsonpN * 7919 % 100000);
+  var s = document.createElement("script");
+  var done = false;
+  var timer = setTimeout(function(){ finish({ ok:false, error:"連不上（逾時）" }); }, 15000);
+  function finish(res){
+    if(done) return; done = true;
+    clearTimeout(timer);
+    try { delete window[name]; } catch(e){ window[name] = undefined; }
+    if(s.parentNode) s.parentNode.removeChild(s);
+    cb(res);
+  }
+  window[name] = function(res){ finish(res); };
+  var q = ["token=" + encodeURIComponent(getPass()), "callback=" + name];
+  for(var k in params) if(params.hasOwnProperty(k))
+    q.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+  s.src = API + "?" + q.join("&");
+  s.onerror = function(){ finish({ ok:false, error:"連不上試算表" }); };
+  document.body.appendChild(s);
+}
+
+function srcMsg(txt, color){
+  var el = document.getElementById("srcMsg");
+  el.innerHTML = txt || "";
+  el.style.color = color || "#111";
+}
+
+/* cols 回來的是 {姓名:1, 分類:2, …}，0 代表那一欄沒找到。
+   使用者看不懂 A/B/C 欄號，所以講「第 1 欄」。 */
+function colsText(cols){
+  if(!cols) return "";
+  var out = [], k;
+  for(k in cols) if(cols.hasOwnProperty(k)){
+    out.push(cols[k] > 0 ? k + "＝第 " + cols[k] + " 欄" : k + "＝沒有這欄");
+  }
+  return out.join("　");
+}
+
+function showRoster(r){
+  var el = document.getElementById("srcNow");
+  el.innerHTML =
+    '現在讀的是：<span class="big">' + escHtml(r.ssName) + "</span> →「<b>" +
+    escHtml(r.sheetName) + "</b>」，共 <span class=\"big\">" + r.count + "</span> 人" +
+    '<span class="cols">' + escHtml(colsText(r.cols)) + "</span>";
+
+  /* 底下那行「這批幾人幾箱」也一起自動算，免得又要手改 */
+  var ch = {}, box = {}, i, p, order = [], f;
+  for(i = 0; i < r.data.length; i++){
+    p = r.data[i];
+    var c = p.ch || "未填通路";
+    if(!ch[c]){ ch[c] = 0; box[c] = {}; order.push(c); }
+    ch[c]++;
+    if(p.box) box[c][p.box] = 1;
+  }
+  var parts = [];
+  for(i = 0; i < order.length; i++){
+    var n = 0, b;
+    for(b in box[order[i]]) if(box[order[i]].hasOwnProperty(b)) n++;
+    parts.push(order[i] + " " + ch[order[i]] + " 人" + (n ? "／" + n + " 箱" : ""));
+  }
+  f = document.getElementById("foot");
+  f.innerHTML = "目前這批：<b>" + r.count + " 人</b>（" + escHtml(parts.join(" · ")) + "）<br>" +
+    "掃描槍 AURORA XB-G20（二維，條碼 QR 都能掃）· 印表機 Epson L6490（A4／縮放 100%／邊界無）。";
+}
+
+function loadSource(){
+  api({ action:"roster" }, function(r){
+    if(!r.ok){
+      document.getElementById("srcNow").innerHTML =
+        '<span style="color:#c00">⚠ 現在連不上試算表（' + escHtml(r.error || "") +
+        "）。姓名貼紙頁和核對頁會改用內建的舊名單。</span>";
+      return;
+    }
+    showRoster(r);
+    var sh = document.getElementById("srcSheet");
+    if(!sh.value) sh.value = r.sheetName;
+  });
+}
+
+function applySource(){
+  var url = document.getElementById("srcUrl").value.trim();
+  var sheet = document.getElementById("srcSheet").value.trim();
+  if(!url){ srcMsg("請先把試算表網址貼進來。", "#c00"); return; }
+
+  /* 只送中間那段 ID。整條網址帶 %2F 送過去 Google 會不高興 */
+  var m = url.match(/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/);
+  var id = m ? m[1] : url;
+  if(!/^[A-Za-z0-9_-]{20,}$/.test(id)){
+    srcMsg("這看起來不像試算表網址。請在試算表按網址列全選複製，整條貼過來。", "#c00");
+    return;
+  }
+
+  srcMsg("正在連過去看看…", "#7b3fd4");
+  api({ action:"setsource", src:id, sheet:sheet }, function(r){
+    if(!r.ok){ srcMsg("✖ " + escHtml(r.error || "換不過去"), "#c00"); return; }
+    srcMsg("✅ 換好了：《" + escHtml(r.ssName) + "》→「" + escHtml(r.sheet) +
+           "」，讀到 " + r.count + " 人。", "#00913A");
+    document.getElementById("srcUrl").value = "";
+    loadSource();
+  });
+}
+
+function resetSource(){
+  if(!window.confirm("要換回原本那份「2026靈芝蟲草登記 → 標籤貼紙」嗎？")) return;
+  srcMsg("換回去中…", "#7b3fd4");
+  api({ action:"setsource", src:"", sheet:"" }, function(r){
+    if(!r.ok){ srcMsg("✖ " + escHtml(r.error || "還原失敗"), "#c00"); return; }
+    srcMsg("✅ 已經換回《" + escHtml(r.ssName) + "》→「" + escHtml(r.sheet) +
+           "」，共 " + r.count + " 人。", "#00913A");
+    document.getElementById("srcUrl").value = "";
+    loadSource();
+  });
+}
+
+loadSource();
+</script>
+</body>
+</html>
