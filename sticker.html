@@ -1037,8 +1037,16 @@ function suggestNameSize(){
   return Math.round(s * 2) / 2;
 }
 
+/* 上次撈到的名單，存在這台電腦。純粹是為了「開頁不用等」，
+   真正的來源永遠是試算表，撈到就蓋掉。 */
+var LIST_CACHE = "wenChuhuoListCache";
+function lastList(){ try { return localStorage.getItem(LIST_CACHE) || ""; } catch(e){ return ""; } }
+function saveList(v){ try { localStorage.setItem(LIST_CACHE, v); } catch(e){} }
+
 window.addEventListener("DOMContentLoaded", function(){
-  if(!$("list").value.trim()) $("list").value = DEFAULT_NAMES;
+  /* 先把「上次撈到的名單」畫出來（秒開），再去試算表拿最新的。
+     Apps Script 一趟來回大概 1.5~5 秒，不先畫的話開頁就是在乾等。 */
+  if(!$("list").value.trim()) $("list").value = lastList() || DEFAULT_NAMES;
   $("layout").addEventListener("change", onLayoutChange);
   var ids = ["cols","rows","cw","ch","ml","mt","gx","gy","qrmm","barmm","nmm","skip",
              "copies","prefix","startNo","pad","cutline"];
@@ -1061,6 +1069,7 @@ window.addEventListener("DOMContentLoaded", function(){
     }
     $("list").value = lines.join("\n");
     render();
+    saveList($("list").value);
     msg("✅ 已從試算表載入 " + res.count + " 人", "#00913A");
   });
 });

@@ -337,6 +337,27 @@ function setSync(text, ok){
   el.className = ok ? "on" : "off";
 }
 
+/* 上次撈到的名單，存在這台電腦。純粹是為了「開頁不用等」——
+   Apps Script 一趟來回 1.5~5 秒，先把上次那份畫出來，撈到最新的再蓋掉。
+   真正的來源永遠是試算表。 */
+var ROSTER_CACHE = "wenChuhuoRosterCache";
+function lastRoster(){
+  try {
+    var s = localStorage.getItem(ROSTER_CACHE);
+    if(!s) return null;
+    var a = JSON.parse(s);
+    return (a instanceof Array) ? a : null;
+  } catch(e){ return null; }
+}
+function saveRoster(arr){
+  try {
+    var slim = [], i;
+    for(i = 0; i < arr.length; i++)
+      slim.push({ code: arr[i].code, name: arr[i].name, tag: arr[i].tag,
+                  ch: arr[i].ch, box: arr[i].box, scanned: false, time: "" });
+    localStorage.setItem(ROSTER_CACHE, JSON.stringify(slim));
+  } catch(e){}
+}
 var STORE_KEY = "shipCheck_v1";
 var ROSTER = [];
 
@@ -699,28 +720,58 @@ window.addEventListener("DOMContentLoaded", function(){
   ROSTER = buildRoster();
   load();
   renderList();
-  /* ① 先撈最新名單（換一批人只要改試算表「標籤貼紙」分頁，這裡完全不用動）
-     ② 再把已掃紀錄疊上去 —— 換一台電腦也能接著掃 */
-  setSync("連線中…", true);
-  api({ action: "roster" }, function(r){
-    if(r.ok && r.data && r.data.length){
+  /* 開頁順序（為了不要乾等 Apps Script 的 1.5~5 秒）：
+     ① 先用「上次撈到的名單」把畫面畫出來 —— 秒開
+     ② 名單和已掃紀錄「同時」發出去，不要一個等一個（本來是 2.3＋1.7 秒用加的）
+     ③ 兩邊都回來了才一次套上畫面，避免閃兩次 */
+  var cachedRoster = lastRoster();
+  if(cachedRoster && cachedRoster.length){
+    ROSTER = cachedRoster;
+    load();
+    renderList();
+    setSync("用上次的名單（" + ROSTER.length + " 人），正在更新…", true);
+  } else {
+    setSync("連線中…", true);
+  }
+
+  var waiting = 2, rosterRes = null, listRes = null;
+  function bothBack(){
+    if(--waiting > 0) return;
+
+    if(rosterRes && rosterRes.ok && rosterRes.data && rosterRes.data.length){
       var arr = [], lines = [], i, p;
-      for(i = 0; i < r.data.length; i++){
-        p = r.data[i];
+      for(i = 0; i < rosterRes.data.length; i++){
+        p = rosterRes.data[i];
         arr.push({ code: p.code, name: p.name, tag: p.tag,
                    ch: p.ch, box: p.box, scanned: false, time: "" });
         lines.push(p.name + "," + (p.tag || "") + "," + (p.code || ""));
       }
       ROSTER = arr;
       $("list").value = lines.join("\n");   /* 設定區也同步顯示目前名單 */
-      load();
-      renderList();
-      setSync("✅ 名單已更新（" + r.count + " 人）", true);
-    } else {
-      setSync("⚠ 名單撈不到，用內建的（" + (r.error || "") + "）", false);
+      saveRoster(arr);
+      load();                               /* 疊上本機存的已掃狀態 */
+    } else if(!cachedRoster || !cachedRoster.length){
+      setSync("⚠ 名單撈不到，用內建的（" + ((rosterRes && rosterRes.error) || "") + "）", false);
     }
-    loadScanned();
-  });
+
+    if(listRes && listRes.ok){
+      var map = {}, j;
+      for(j = 0; j < listRes.data.length; j++)
+        map[String(listRes.data[j].code).toUpperCase()] = listRes.data[j];
+      var hit = 0;
+      for(j = 0; j < ROSTER.length; j++){
+        var m = map[ROSTER[j].code.toUpperCase()];
+        if(m){ ROSTER[j].scanned = true; ROSTER[j].time = normTime(m.time); hit++; }
+      }
+      save();
+      setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人 · 已掃 " + hit + " 筆", true);
+    } else {
+      setSync("⚠ 連不上試算表（" + ((listRes && listRes.error) || "") + "）— 改用本機紀錄", false);
+    }
+    renderList();
+  }
+  api({ action: "roster" }, function(r){ rosterRes = r; bothBack(); });
+  api({ action: "list"   }, function(r){ listRes   = r; bothBack(); });
   if(!lsAvailable()){
     var w = document.createElement("div");
     w.className = "panel";
