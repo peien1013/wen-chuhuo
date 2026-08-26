@@ -374,7 +374,9 @@ function load(){
 
 /* ---- 畫面 ---- */
 /* 通路顯示順序：郵局 → 7-11 → 全家，跟試算表「郵寄出貨」一致 */
-var CH_ORDER = ["i郵箱", "7-11", "全家"];
+/* 通路顯示順序。試算表可能寫「7-11」也可能寫「7-ELEVEN」，
+   所以比對用關鍵字，不要用完全相等，不然那一欄會被丟到最後面。 */
+var CH_ORDER = [/郵|post/i, /7|eleven|711/i, /全家|family|fami/i];
 
 function cardHtml(p, flashCode, extraCls){
   return '<div class="p ' + (p.ch ? chCls(p.ch) : "") + (p.scanned ? " done" : "") +
@@ -395,7 +397,12 @@ function renderList(flashCode){
     if(!groups[c]) groups[c] = [];
     groups[c].push(ROSTER[i]);
   }
-  for(i = 0; i < CH_ORDER.length; i++) if(groups[CH_ORDER[i]]) order.push(CH_ORDER[i]);
+  var keys = Object.keys(groups);
+  for(i = 0; i < CH_ORDER.length; i++){
+    for(var ki = 0; ki < keys.length; ki++){
+      if(order.indexOf(keys[ki]) < 0 && CH_ORDER[i].test(keys[ki])) order.push(keys[ki]);
+    }
+  }
   Object.keys(groups).forEach(function(k){ if(order.indexOf(k) < 0) order.push(k); });
 
   var h = "";
