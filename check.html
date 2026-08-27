@@ -46,6 +46,8 @@ h1{font-size:26px;margin:0 0 3px}
 .ch.post{background:#00913A}
 .ch.seven{background:#F07000}
 .ch.fami{background:#0F6FE0}
+/* 自取（沒有通路）—— 用灰色跟三家超商區隔開 */
+.ch.self{background:#6B7280}
 #bigShip{margin-top:12px;font-size:27px;font-weight:800;line-height:1.3}
 #bigShip .ch{font-size:26px;padding:3px 16px}
 #bigShip .box{margin-left:12px;color:#222}
@@ -474,7 +476,8 @@ function cardHtml(p, flashCode, extraCls){
 function renderList(flashCode){
   var groups = {}, order = [], i, c, p;
   for(i = 0; i < ROSTER.length; i++){
-    c = ROSTER[i].ch || "未分類";
+    /* 沒填通路＝自取（登記表「超商通路」空白的那些人） */
+    c = ROSTER[i].ch || "自取";
     if(!groups[c]) groups[c] = [];
     groups[c].push(ROSTER[i]);
   }
@@ -497,7 +500,7 @@ function renderList(flashCode){
       if(list[i].box) boxes[list[i].box] = 1;
     }
     var nBox = Object.keys(boxes).length;
-    h += '<div class="gcol"><div class="ghead">' + (c === "未分類" ? '<span class="ch fami">未分類</span>' : chChip(c)) +
+    h += '<div class="gcol"><div class="ghead">' + (c === "自取" ? '<span class="ch self">🏠 自取</span>' : chChip(c)) +
          '<span class="gcount">' + done + " / " + all + " 組" +
          (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
