@@ -104,6 +104,10 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
 .p .pn .tg{font-size:14px;font-weight:800;color:#7a4a00;background:#ffe08a;
   padding:1px 7px;border-radius:5px;margin-left:7px;vertical-align:2px}
 .p .pc{font-size:15px;font-weight:700;color:#999;letter-spacing:2px;margin-top:3px}
+/* 一個人 2 組以上時，編號旁邊顯示「已掃幾組 / 共幾組」 */
+.p .qn{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:20px;
+  background:#B45309;color:#fff;font-size:14px;font-weight:900;letter-spacing:1px}
+.p.done .qn{background:#00913A}
 .p .pb{margin-top:6px;font-size:13px;line-height:1.4}
 .p .pb .ch{font-size:12px;padding:1px 8px}
 .p .pb .box{margin-left:6px;font-weight:700;color:#444}
@@ -354,7 +358,9 @@ function saveRoster(arr){
     var slim = [], i;
     for(i = 0; i < arr.length; i++)
       slim.push({ code: arr[i].code, name: arr[i].name, tag: arr[i].tag,
-                  ch: arr[i].ch, box: arr[i].box, scanned: false, time: "" });
+                  ch: arr[i].ch, box: arr[i].box,
+                  qty: arr[i].qty || 1, hits: arr[i].hits || 0,
+                  scanned: false, time: "" });
     localStorage.setItem(ROSTER_CACHE, JSON.stringify(slim));
   } catch(e){}
 }
@@ -396,8 +402,13 @@ function buildRoster(){
       if(!parts[k]) parts.splice(k, 1);
     }
     if(!parts.length) continue;
-    var code = null, tag = "", j;
+    var code = null, tag = "", j, qty = 1;
     for(j=1; j<parts.length; j++){
+      /* 組數用 x8 標（試算表的「組數」欄），一個人幾組就要掃幾次 */
+      if(qty === 1 && /^[xX*][ ]*[0-9]{1,3}$/.test(parts[j])){
+        qty = Math.max(1, Math.min(99, parseInt(parts[j].replace(/[^0-9]/g, ""), 10) || 1));
+        continue;
+      }
       if(!code && looksLikeCode(parts[j])) code = parts[j];
       else if(!tag && looksLikeTag(parts[j])) tag = parts[j];
     }
@@ -405,16 +416,26 @@ function buildRoster(){
     var sp = SHIPPING[parts[0]] || null;
     out.push({ code: code, name: parts[0], tag: tag,
                ch: sp ? sp[0] : "", box: sp ? sp[1] : "",
-               scanned: false, time: "" });
+               qty: qty, hits: 0, scanned: false, time: "" });
   }
   return out;
+}
+
+/* 一個人訂幾組就要掃幾組（試算表的「組數」欄）。
+   掃滿 qty 次才算完成 —— 不然 8 組的人掃第 2 張就會被當成重複掃。 */
+function mark(p){ p.scanned = (p.hits >= (p.qty || 1)); }
+function totalQty(){ var n = 0, i; for(i=0;i<ROSTER.length;i++) n += (ROSTER[i].qty || 1); return n; }
+function doneQty(){
+  var n = 0, i, q;
+  for(i=0;i<ROSTER.length;i++){ q = ROSTER[i].qty || 1; n += Math.min(ROSTER[i].hits || 0, q); }
+  return n;
 }
 
 /* ---- 存檔（只存掃到的編號＋時間，名單本身重算） ---- */
 function save(){
   var done = {};
   for(var i=0; i<ROSTER.length; i++)
-    if(ROSTER[i].scanned) done[ROSTER[i].code] = ROSTER[i].time;
+    if(ROSTER[i].hits > 0) done[ROSTER[i].code] = { t: ROSTER[i].time, n: ROSTER[i].hits };
   try { localStorage.setItem(STORE_KEY, JSON.stringify(done)); } catch(e){}
 }
 function load(){
@@ -422,8 +443,11 @@ function load(){
   try { done = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); } catch(e){ done = {}; }
   for(var i=0; i<ROSTER.length; i++){
     if(done[ROSTER[i].code]){
-      ROSTER[i].scanned = true;
-      ROSTER[i].time = done[ROSTER[i].code];
+      /* 舊版只存字串（時間），新版存 {t,n}。兩種都要吃 */
+      var v = done[ROSTER[i].code];
+      ROSTER[i].hits = (typeof v === "object" && v) ? (v.n || 1) : 1;
+      ROSTER[i].time = (typeof v === "object" && v) ? (v.t || "") : String(v);
+      mark(ROSTER[i]);
     }
   }
 }
@@ -441,7 +465,8 @@ function cardHtml(p, flashCode, extraCls){
          '" title="' + esc(p.time || "還沒掃") + '">' +
          '<div class="pn">' + esc(p.name) +
            (p.tag ? '<span class="tg">' + esc(p.tag) + "</span>" : "") + "</div>" +
-         '<div class="pc">' + esc(p.code) + "</div>" +
+         '<div class="pc">' + esc(p.code) +
+           ((p.qty || 1) > 1 ? '<span class="qn">' + (p.hits || 0) + " / " + p.qty + "</span>" : "") + "</div>" +
          (p.ch ? '<div class="pb">' + boxLine(p) + "</div>" : "") +
          '<span class="tick">✅</span></div>';
 }
@@ -464,16 +489,19 @@ function renderList(flashCode){
   var h = "";
   for(var oi = 0; oi < order.length; oi++){
     c = order[oi];
-    var list = groups[c], done = 0, boxes = {};
+    var list = groups[c], done = 0, all = 0, boxes = {};
     for(i = 0; i < list.length; i++){
-      if(list[i].scanned) done++;
+      var q = list[i].qty || 1;
+      all += q;
+      done += Math.min(list[i].hits || 0, q);
       if(list[i].box) boxes[list[i].box] = 1;
     }
     var nBox = Object.keys(boxes).length;
     h += '<div class="gcol"><div class="ghead">' + (c === "未分類" ? '<span class="ch fami">未分類</span>' : chChip(c)) +
-         '<span class="gcount">' + done + " / " + list.length + " 人" +
+         '<span class="gcount">' + done + " / " + all + " 組" +
+         (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
-         (done === list.length ? '<span class="gdone">✅ 這區掃完了</span>' : "") +
+         (done === all ? '<span class="gdone">✅ 這區掃完了</span>' : "") +
          "</div><div class=\"grid\">";
     for(i = 0; i < list.length; i++) h += cardHtml(list[i], flashCode);
     h += "</div></div>";
@@ -482,14 +510,13 @@ function renderList(flashCode){
   updateCount();
 }
 function updateCount(){
-  var done = 0, i;
-  for(i=0; i<ROSTER.length; i++) if(ROSTER[i].scanned) done++;
-  var left = ROSTER.length - done;
+  var done = doneQty(), all = totalQty(), i;
+  var left = all - done;
   $("cntDone").textContent = done;
-  $("cntAll").textContent = ROSTER.length;
+  $("cntAll").textContent = all;
   $("cntLeft").textContent = left ? ("還差 " + left + " 個") : "全部掃完了 🎉";
   $("cntLeft").style.color = left ? "#c00" : "#00913A";
-  $("fill").style.width = ROSTER.length ? (done*100/ROSTER.length) + "%" : "0";
+  $("fill").style.width = all ? (done*100/all) + "%" : "0";
 }
 
 /* 通路徽章：i郵箱綠／7-11 橘／全家藍 */
@@ -587,14 +614,21 @@ function lookup(raw){
     return;
   }
   var p = ROSTER[idx];
-  if(p.scanned){
+  var need = p.qty || 1;
+
+  /* 一個人訂幾組就要掃幾次。掃滿了才算重複掃。 */
+  if(p.hits >= need){
     board("dup", p.name, p.code,
-          "⚠ 這個剛剛已經掃過了（" + p.time + "）— 不要重複裝箱", p);
+          need > 1
+            ? "⚠ 這個人只有 " + need + " 組，已經掃滿了 — 不要再裝了"
+            : "⚠ 這個剛剛已經掃過了（" + p.time + "）— 不要重複裝箱", p);
     beepDup();
     renderList(p.code);
     return;
   }
-  p.scanned = true;
+
+  p.hits++;
+  mark(p);
   p.time = stamp();
   save();
   renderList(p.code);
@@ -604,11 +638,11 @@ function lookup(raw){
     if(res.time){ p.time = normTime(res.time); save(); }
     setSync("✅ 已同步試算表（第 " + (res.total || "?") + " 筆）", true);
   });
-  var left = 0;
-  for(i=0; i<ROSTER.length; i++) if(!ROSTER[i].scanned) left++;
+  var left = totalQty() - doneQty();
+  var thisOne = need > 1 ? ("這個人 " + p.hits + " / " + need + " 組　") : "";
   board("ok", p.name, p.code,
-        left ? ("✅ 已記錄 " + p.time + " — 還差 " + left + " 個")
-             : "🎉 全部 " + ROSTER.length + " 個都掃完了", p);
+        left ? ("✅ " + thisOne + "已記錄 " + p.time + " — 還差 " + left + " 組")
+             : "🎉 全部 " + totalQty() + " 組都掃完了", p);
   beepOk();
 }
 
@@ -668,7 +702,11 @@ function manualAsk(){
 function copyMissing(){
   var miss = [], i;
   for(i=0; i<ROSTER.length; i++)
-    if(!ROSTER[i].scanned) miss.push(ROSTER[i].code + " " + ROSTER[i].name);
+    if(!ROSTER[i].scanned){
+      var q = ROSTER[i].qty || 1, h = ROSTER[i].hits || 0;
+      miss.push(ROSTER[i].code + " " + ROSTER[i].name +
+                (q > 1 ? "（還差 " + (q - h) + " / " + q + " 組）" : ""));
+    }
   var txt = miss.length ? miss.join("\n") : "（全部都掃到了）";
   try{
     navigator.clipboard.writeText(txt);
@@ -679,7 +717,7 @@ function copyMissing(){
 }
 function resetAll(){
   if(!window.confirm("確定要把掃描紀錄全部清掉、重新開始嗎？")) return;
-  for(var i=0; i<ROSTER.length; i++){ ROSTER[i].scanned = false; ROSTER[i].time = ""; }
+  for(var i=0; i<ROSTER.length; i++){ ROSTER[i].hits = 0; ROSTER[i].scanned = false; ROSTER[i].time = ""; }
   save();
   renderList();
   board("idle", "已重置 — 可以重新開始掃", "", "");
@@ -706,8 +744,8 @@ function lsAvailable(){
 /* 掃到一半離開要攔一下 */
 window.addEventListener("beforeunload", function(e){
   var done = 0, i;
-  for(i=0; i<ROSTER.length; i++) if(ROSTER[i].scanned) done++;
-  if(done > 0 && done < ROSTER.length){ e.preventDefault(); e.returnValue = ""; }
+  done = doneQty();
+  if(done > 0 && done < totalQty()){ e.preventDefault(); e.returnValue = ""; }
 });
 
 window.addEventListener("DOMContentLoaded", function(){
@@ -743,8 +781,10 @@ window.addEventListener("DOMContentLoaded", function(){
       for(i = 0; i < rosterRes.data.length; i++){
         p = rosterRes.data[i];
         arr.push({ code: p.code, name: p.name, tag: p.tag,
-                   ch: p.ch, box: p.box, scanned: false, time: "" });
-        lines.push(p.name + "," + (p.tag || "") + "," + (p.code || ""));
+                   ch: p.ch, box: p.box,
+                   qty: p.qty || 1, hits: 0, scanned: false, time: "" });
+        lines.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || "") +
+                   ((p.qty && p.qty > 1) ? ",x" + p.qty : ""));
       }
       ROSTER = arr;
       $("list").value = lines.join("\n");   /* 設定區也同步顯示目前名單 */
@@ -761,10 +801,16 @@ window.addEventListener("DOMContentLoaded", function(){
       var hit = 0;
       for(j = 0; j < ROSTER.length; j++){
         var m = map[ROSTER[j].code.toUpperCase()];
-        if(m){ ROSTER[j].scanned = true; ROSTER[j].time = normTime(m.time); hit++; }
+        /* 試算表的「掃了幾次」就是這個人已經掃到的組數 */
+        if(m){
+          ROSTER[j].hits = Math.max(ROSTER[j].hits || 0, Number(m.count) || 1);
+          ROSTER[j].time = normTime(m.time);
+          mark(ROSTER[j]);
+          hit += Math.min(ROSTER[j].hits, ROSTER[j].qty || 1);
+        }
       }
       save();
-      setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人 · 已掃 " + hit + " 筆", true);
+      setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人／" + totalQty() + " 組 · 已掃 " + hit + " 組", true);
     } else {
       setSync("⚠ 連不上試算表（" + ((listRes && listRes.error) || "") + "）— 改用本機紀錄", false);
     }
@@ -792,11 +838,16 @@ function loadScanned(){
     var hit = 0;
     for(i=0; i<ROSTER.length; i++){
       var m = map[ROSTER[i].code.toUpperCase()];
-      if(m){ ROSTER[i].scanned = true; ROSTER[i].time = normTime(m.time); hit++; }
+      if(m){
+        ROSTER[i].hits = Math.max(ROSTER[i].hits || 0, Number(m.count) || 1);
+        ROSTER[i].time = normTime(m.time);
+        mark(ROSTER[i]);
+        hit += Math.min(ROSTER[i].hits, ROSTER[i].qty || 1);
+      }
     }
     save();
     renderList();
-    setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人 · 已掃 " + hit + " 筆", true);
+    setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人／" + totalQty() + " 組 · 已掃 " + hit + " 組", true);
   });
 }
 </script>
