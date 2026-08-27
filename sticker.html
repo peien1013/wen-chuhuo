@@ -85,14 +85,14 @@ button.w{background:#666}
 .cell.chlay .side{flex:0 0 auto;display:flex;flex-direction:column;
   align-items:center;gap:0.5mm}
 /* ⚠ 底色一定要配 print-color-adjust:exact，不然列印時瀏覽器會把它拿掉，變成白底白字 */
-.cell.chlay .chl{font-size:3.2mm;font-weight:800;color:#fff;line-height:1.25;
+.cell.chlay .chl{font-size:3.5mm;font-weight:800;color:#fff;line-height:1.25;
   padding:0.4mm 1.5mm;border-radius:1mm;white-space:nowrap;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}
 .cell.chlay .chl.post {background:#00913A}
 .cell.chlay .chl.seven{background:#F07000}
 .cell.chlay .chl.fami {background:#0F6FE0}
 .cell.chlay .chl.other{background:#555}
-.cell.chlay .rem{font-size:2.9mm;font-weight:700;color:#000;
+.cell.chlay .rem{font-size:5mm;font-weight:800;color:#000;
   white-space:nowrap;line-height:1.2}
 
 /* 對位測試頁 */
@@ -1081,7 +1081,7 @@ function suggestNameSize(){
   var ch = num("ch", 29.7), v = $("layout").value, s;
   if(v === "nameonly")    s = Math.min(22, ch * 0.58);
   else if(v === "barbig") s = Math.min(16, ch * 0.44);
-  else if(v === "barch")  s = Math.min(20, ch * 0.50);   /* 通路和條碼都小，空間全給姓名 */
+  else if(v === "barch")  s = Math.min(15, ch * 0.40);   /* 通路小、備註中、姓名讓一點空間出來 */
   else if(v === "bar")    s = Math.min(13, ch * 0.34);
   else if(v === "qrbig")  s = Math.min(13, ch * 0.36);
   else if(v === "noqr")   s = Math.min(15, ch * 0.40);
