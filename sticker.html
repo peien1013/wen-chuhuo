@@ -92,8 +92,13 @@ button.w{background:#666}
 .cell.chlay .chl.seven{background:#F07000}
 .cell.chlay .chl.fami {background:#0F6FE0}
 .cell.chlay .chl.other{background:#555}
-.cell.chlay .rem{font-size:5mm;font-weight:800;color:#000;
+.cell.chlay .rem{font-size:5mm;font-weight:800;color:#000;max-width:24mm;overflow:hidden;
   white-space:nowrap;line-height:1.2}
+/* 2 組以上：整格淡黃底 ＋ 左上角「第幾張／共幾張」。
+   ⚠ 底色一樣要配 print-color-adjust:exact，不然列印時會被瀏覽器拿掉 */
+.cell.multi{background:#FFF3D6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cell.multi .qb{position:absolute;top:0.7mm;left:1.6mm;font-size:3mm;font-weight:900;
+  color:#B45309;line-height:1;letter-spacing:0.2mm}
 
 /* 對位測試頁 */
 .sheet.test .cell{border:0.3mm dashed #999}
@@ -754,7 +759,7 @@ function parseList(){
   var prefix = $("prefix").value;
   var seq = int("startNo", 1);
   var padLen = int("pad", 3);
-  var out = [], i, t, parts, name, code, tag, ch;
+  var out = [], i, t, parts, name, code, tag, ch, qty;
   for(i=0; i<lines.length; i++){
     t = lines[i].trim();
     if(!t) continue;
@@ -768,10 +773,16 @@ function parseList(){
     /* 後面的欄位自己認：像編號的當編號，短中文的當分類（例「日本」「疫情」），
        電話和長地址一律忽略 —— 這樣從試算表整段複製貼進來也不會出錯。 */
     code = null;
+    qty  = 1;
     ch = "";
     tag = "";
     for(k=1; k<parts.length; k++){
       /* 通路要先認 —— 「7-ELEVEN」長得也很像編號，順序反了會被當成編號吃掉 */
+      /* 組數用 x3 這種寫法標，才不會跟編號搞混（單純打 3 沒辦法分辨）*/
+      if(qty === 1 && /^[xX*][ ]*[0-9]{1,3}$/.test(parts[k])){
+        qty = Math.max(1, Math.min(99, parseInt(parts[k].replace(/[^0-9]/g, ""), 10) || 1));
+        continue;
+      }
       if(!ch && looksLikeCh(parts[k])) ch = parts[k];
       else if(!code && looksLikeCode(parts[k])) code = parts[k];
       else if(!tag && looksLikeTag(parts[k])) tag = parts[k];
@@ -780,9 +791,22 @@ function parseList(){
       code = prefix + padNum(seq, padLen);
       seq++;
     }
-    out.push({ name: name, code: code, tag: tag, ch: ch });
+    out.push({ name: name, code: code, tag: normTag(tag), ch: ch, qty: qty });
   }
   return out;
+}
+/* 備註歸類：試算表上大家寫法很亂（日本行／日本需要／求疫情／（疫情需要）…），
+   貼紙上只要看得懂是哪一類就好，所以統一歸成「日本」「疫情」。
+   空白就留空白；兩個都提到就印「疫情+日本」；認不出來的原樣印出來（字會自動縮）。 */
+function normTag(s){
+  s = String(s || "").trim();
+  if(!s) return "";
+  var jp = /日本|橫濱|沖繩/.test(s);
+  var ep = /疫情|防疫|新冠|仙丹/.test(s);
+  if(jp && ep) return "疫情+日本";
+  if(ep) return "疫情";
+  if(jp) return "日本";
+  return s;
 }
 /* 通路只認這幾種寫法，不要用關鍵字亂猜 —— 編號 S007 裡也有 7 */
 function looksLikeCh(s){
@@ -803,7 +827,9 @@ function looksLikeCode(s){
   return true;
 }
 function looksLikeTag(s){
-  if(!s || s.length > 8) return false;                       /* 太長的是地址/門市 */
+  if(!s || s.length > 20) return false;                      /* 太長的是地址/門市。放寬到 20 是因為
+                                                                備註常常寫成「2位都是日本行需求」這種長句，
+                                                                normTag 會再把它歸成日本/疫情 */
   if(/^\d{7,}$/.test(s.replace(/-/g, ""))) return false;     /* 電話 */
   return true;
 }
@@ -894,6 +920,12 @@ function cellEl(it, r, c, opt){
     h += nameBlock;
     h += "</div>";
   }
+  /* 2 組以上：整格上色 ＋ 左上角標第幾張，貼的時候一眼看得出來這個人要貼好幾個。
+     用絕對定位，才不會擠到姓名和條碼的版面。 */
+  if(it.qty > 1){
+    d.className += " multi";
+    h = '<div class="qb">' + it.seq + " / " + it.qty + "</div>" + h;
+  }
   d.innerHTML = h;
   return d;
 }
@@ -928,6 +960,21 @@ function fitVert(){
     if(usedH(cell, gap) > avail + 0.5 && !codeWarn)
       codeWarn = "格子太矮，條碼＋編號＋姓名塞不下 —— 改用「上條碼 ＋ 下姓名大字」少印一行編號，" +
                  "或把「條碼高 mm」調小";
+  }
+}
+
+/* 備註太長就縮字級。大部分會被 normTag 歸成「日本」「疫情」，
+   但偶爾有沒歸到的長句（例「需要加持能量提升免疫力」），縮到塞得下為止 */
+function fitRem(){
+  var els = document.querySelectorAll(".cell.chlay .rem"), i, el, size, guard;
+  for(i=0; i<els.length; i++){
+    el = els[i]; size = 5; guard = 0;
+    el.style.fontSize = size + "mm";
+    while(el.scrollWidth > el.clientWidth + 1 && size > 2.4 && guard < 40){
+      size -= 0.25;
+      el.style.fontSize = size + "mm";
+      guard++;
+    }
   }
 }
 
@@ -973,10 +1020,19 @@ function render(){
   var people = parseList();
   if(!people.length){ msg("名單是空的，先在上面貼姓名", "#c00"); return; }
 
+  /* 一個人訂幾組就印幾張（試算表的「組數」欄）。「每人印幾張」是再乘上去的。
+     多組的會標上第幾張，例如 3/8，方便一邊貼一邊數。 */
   var copies = int("copies", 1);
   var items = [], i, c;
-  for(i=0; i<people.length; i++)
-    for(c=0; c<copies; c++) items.push(people[i]);
+  for(i=0; i<people.length; i++){
+    var q = people[i].qty || 1;
+    var total = q * copies, k = 0;
+    for(c=0; c<total; c++){
+      k++;
+      items.push({ name: people[i].name, code: people[i].code, tag: people[i].tag,
+                   ch: people[i].ch, qty: q, seq: k });
+    }
+  }
 
   var opt = readOpt();
   codeWarn = null;
@@ -1002,6 +1058,7 @@ function render(){
     out.appendChild(sheet);
   }
   fitNames(opt);
+  fitRem();
   fitVert();
 
   var over = opt.ml + opt.cols*opt.cw + (opt.cols-1)*opt.gx;
@@ -1117,7 +1174,8 @@ window.addEventListener("DOMContentLoaded", function(){
     var lines = [];
     for(var i = 0; i < res.data.length; i++){
       var p = res.data[i];
-      lines.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || ""));
+      lines.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || "") +
+                 ((p.qty && p.qty > 1) ? ",x" + p.qty : ""));
     }
     $("list").value = lines.join("\n");
     render();
