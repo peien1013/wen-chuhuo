@@ -76,6 +76,24 @@ button.w{background:#666}
 .cell.vert .bc{line-height:0;flex:0 0 auto}
 .cell.vert .nmline{justify-content:center;flex:0 0 auto}
 .cell.vert .no{flex:0 0 auto;font-size:2.9mm;color:#444}
+/* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
+   通路和備註都刻意做小 —— 走超商的是少數人，版面優先讓給姓名。 */
+.cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 2mm;text-align:left}
+.cell.chlay .toprow{display:flex;align-items:center;justify-content:space-between;
+  width:100%;gap:1.5mm;flex:0 0 auto}
+.cell.chlay .toprow .nmline{flex:1 1 auto;min-width:0;justify-content:flex-start}
+.cell.chlay .side{flex:0 0 auto;display:flex;flex-direction:column;
+  align-items:center;gap:0.5mm}
+/* ⚠ 底色一定要配 print-color-adjust:exact，不然列印時瀏覽器會把它拿掉，變成白底白字 */
+.cell.chlay .chl{font-size:3mm;font-weight:800;color:#fff;line-height:1.25;
+  padding:0.4mm 1.5mm;border-radius:1mm;white-space:nowrap;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cell.chlay .chl.post {background:#00913A}
+.cell.chlay .chl.seven{background:#F07000}
+.cell.chlay .chl.fami {background:#0F6FE0}
+.cell.chlay .chl.other{background:#555}
+.cell.chlay .rem{font-size:2.9mm;font-weight:700;color:#000;
+  white-space:nowrap;line-height:1.2}
 
 /* 對位測試頁 */
 .sheet.test .cell{border:0.3mm dashed #999}
@@ -103,7 +121,8 @@ button.w{background:#666}
     <h2>① 貼上名單</h2>
     <textarea id="list" placeholder="一行一個人，直接貼上就好：&#10;王小明&#10;陳美玲&#10;林大寶&#10;&#10;想自己指定編號的話，用逗號或 Tab 分隔（第二欄＝編號）：&#10;王小明,S001&#10;陳美玲,S002"></textarea>
     <p class="hint">
-      一行一個人。<b>第二欄可填自訂編號</b>（用逗號、Tab 或空白分隔），沒填就照下面的規則自動編號。<br>
+      一行一個人，用逗號分開：<b>姓名,備註,編號,通路</b>（後面三個都可以留空）。<br>
+      欄位順序不用照著寫，程式自己認：像編號的當編號、<b>i郵箱／7-11／全家</b>當通路、其他短字當備註。<br>
       空白行會自動跳過。
     </p>
   </div>
@@ -119,6 +138,7 @@ button.w{background:#666}
         <select id="layout" class="wide" style="width:230px">
           <option value="barbig">姓名 ＋ 條碼（不印編號）</option>
           <option value="bar">姓名 ＋ 條碼 ＋ 編號小字</option>
+          <option value="barch">姓名 ＋ 通路（i郵箱／7-11／全家）＋ 備註 ＋ 條碼</option>
           <option value="qrbig">姓名 ＋ QR（不印編號）</option>
           <option value="qr">姓名 ＋ QR ＋ 編號</option>
           <option value="nameonly">只有姓名（超大字）</option>
@@ -734,7 +754,7 @@ function parseList(){
   var prefix = $("prefix").value;
   var seq = int("startNo", 1);
   var padLen = int("pad", 3);
-  var out = [], i, t, parts, name, code;
+  var out = [], i, t, parts, name, code, tag, ch;
   for(i=0; i<lines.length; i++){
     t = lines[i].trim();
     if(!t) continue;
@@ -748,18 +768,33 @@ function parseList(){
     /* 後面的欄位自己認：像編號的當編號，短中文的當分類（例「日本」「疫情」），
        電話和長地址一律忽略 —— 這樣從試算表整段複製貼進來也不會出錯。 */
     code = null;
+    ch = "";
     tag = "";
     for(k=1; k<parts.length; k++){
-      if(!code && looksLikeCode(parts[k])) code = parts[k];
+      /* 通路要先認 —— 「7-ELEVEN」長得也很像編號，順序反了會被當成編號吃掉 */
+      if(!ch && looksLikeCh(parts[k])) ch = parts[k];
+      else if(!code && looksLikeCode(parts[k])) code = parts[k];
       else if(!tag && looksLikeTag(parts[k])) tag = parts[k];
     }
     if(!code){
       code = prefix + padNum(seq, padLen);
       seq++;
     }
-    out.push({ name: name, code: code, tag: tag });
+    out.push({ name: name, code: code, tag: tag, ch: ch });
   }
   return out;
+}
+/* 通路只認這幾種寫法，不要用關鍵字亂猜 —— 編號 S007 裡也有 7 */
+function looksLikeCh(s){
+  return /^(i ?郵箱|郵箱|郵局|中華郵政|7-?11|7-?eleven|統一超商|全家|family ?mart)$/i.test(s);
+}
+/* 通路統一成三種顯示名稱，順便決定顏色 */
+function chInfo(s){
+  if(!s) return null;
+  if(/郵/.test(s))                    return { name: "i郵箱",   cls: "post" };
+  if(/7|eleven|統一/i.test(s))        return { name: "7-ELEVEN", cls: "seven" };
+  if(/全家|family/i.test(s))          return { name: "全家",     cls: "fami" };
+  return { name: s, cls: "other" };
 }
 function looksLikeCode(s){
   if(!s || s.length > 12) return false;
@@ -810,9 +845,10 @@ function barSvg(text, wMm, hMm){
 
 function cellEl(it, r, c, opt){
   var d = document.createElement("div");
-  var isBar = (opt.layout === "bar" || opt.layout === "barbig");
+  var isCh  = (opt.layout === "barch");
+  var isBar = (opt.layout === "bar" || opt.layout === "barbig" || isCh);
   var centered = (opt.layout === "nameonly" || opt.layout === "noqr");
-  d.className = "cell" + (isBar ? " vert" : (centered ? " center" : ""));
+  d.className = "cell" + (isBar ? " vert" : (centered ? " center" : "")) + (isCh ? " chlay" : "");
   d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
   d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
   d.style.width  = opt.cw + "mm";
@@ -827,7 +863,20 @@ function cellEl(it, r, c, opt){
                   "</div>";
 
   var h = "";
-  if(isBar){
+  if(isCh){
+    /* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
+       通路上色，分成三堆時一眼看得出來。 */
+    var ci = chInfo(it.ch);
+    h += '<div class="toprow">' +
+           '<div class="nmline" style="font-size:' + opt.nmm + 'mm">' +
+             '<span class="nm">' + esc(it.name) + "</span></div>" +
+           '<div class="side">' +
+             (ci ? '<div class="chl ' + ci.cls + '">' + esc(ci.name) + "</div>" : "") +
+             (it.tag ? '<div class="rem">' + esc(it.tag) + "</div>" : "") +
+           "</div>" +
+         "</div>";
+    h += '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 4.4), opt.barmm) + "</div>";
+  } else if(isBar){
     /* 姓名在上、條碼在下 */
     var bw = Math.max(10, opt.cw - 4.4);
     h += nameBlock;
@@ -1021,6 +1070,8 @@ function doPrint(){
 
 /* ---- 版面切換時給個合適的預設字級 ---- */
 function onLayoutChange(){
+  /* 通路版面：條碼壓矮一點（掃得到就好），空間讓給姓名 */
+  if($("layout").value === "barch" && parseFloat($("barmm").value) > 8) $("barmm").value = 8;
   $("nmm").value = suggestNameSize();
   render();
 }
@@ -1030,6 +1081,7 @@ function suggestNameSize(){
   var ch = num("ch", 29.7), v = $("layout").value, s;
   if(v === "nameonly")    s = Math.min(22, ch * 0.58);
   else if(v === "barbig") s = Math.min(16, ch * 0.44);
+  else if(v === "barch")  s = Math.min(15, ch * 0.42);
   else if(v === "bar")    s = Math.min(13, ch * 0.34);
   else if(v === "qrbig")  s = Math.min(13, ch * 0.36);
   else if(v === "noqr")   s = Math.min(15, ch * 0.40);
@@ -1065,7 +1117,7 @@ window.addEventListener("DOMContentLoaded", function(){
     var lines = [];
     for(var i = 0; i < res.data.length; i++){
       var p = res.data[i];
-      lines.push(p.name + "," + (p.tag || "") + "," + (p.code || ""));
+      lines.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || ""));
     }
     $("list").value = lines.join("\n");
     render();
