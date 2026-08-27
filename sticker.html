@@ -78,7 +78,8 @@ button.w{background:#666}
 .cell.vert .no{flex:0 0 auto;font-size:2.9mm;color:#444}
 /* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
    通路和備註都刻意做小 —— 走超商的是少數人，版面優先讓給姓名。 */
-.cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 2mm;text-align:left}
+/* 左右留 4mm ——「無邊界列印」實際上印不到紙的最邊邊，內容太靠邊會被切掉 */
+.cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 4mm;text-align:left}
 /* 姓名和右邊小字群「黏在一起」，不要一個推到最左、一個推到最右 ——
    小字貼著紙邊有被裁掉的風險，而且看起來太散。 */
 .cell.chlay .toprow{display:flex;align-items:center;justify-content:flex-start;
@@ -939,7 +940,8 @@ function cellEl(it, r, c, opt){
              (it.tag ? '<div class="rem">' + esc(it.tag) + "</div>" : "") +
            "</div>" +
          "</div>";
-    h += '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 4.4), opt.barmm) + "</div>";
+    /* 條碼也跟著往內縮，跟上面的 4mm 邊界對齊 */
+    h += '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 8.8), opt.barmm) + "</div>";
   } else if(isBar){
     /* 姓名在上、條碼在下 */
     var bw = Math.max(10, opt.cw - 4.4);
