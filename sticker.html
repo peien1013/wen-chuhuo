@@ -90,8 +90,8 @@ button.w{background:#666}
 .cell.chlay .qbs{font-size:3.4mm;font-weight:900;color:#B45309;line-height:1.2;
   white-space:nowrap;letter-spacing:0.2mm}
 /* ⚠ 底色一定要配 print-color-adjust:exact，不然列印時瀏覽器會把它拿掉，變成白底白字 */
-.cell.chlay .chl{font-size:3.5mm;font-weight:800;color:#fff;line-height:1.25;
-  padding:0.4mm 1.5mm;border-radius:1mm;white-space:nowrap;
+.cell.chlay .chl{font-size:5.5mm;font-weight:900;color:#fff;line-height:1.15;min-width:5mm;text-align:center;
+  padding:0.5mm 1.6mm;border-radius:1.2mm;white-space:nowrap;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}
 .cell.chlay .chl.post {background:#00913A}
 .cell.chlay .chl.seven{background:#F07000}
@@ -104,6 +104,11 @@ button.w{background:#666}
 .cell.multi{background:#FFF3D6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .cell.multi .qb{position:absolute;top:0.7mm;left:1.6mm;font-size:3mm;font-weight:900;
   color:#B45309;line-height:1;letter-spacing:0.2mm}
+/* 同一張訂單（一起登記付錢）的名字上色，相鄰的組換顏色。
+   底色已經被「2 組以上」的淡黃用掉了，所以用文字顏色。 */
+.cell.chlay.grp0 .nm{color:#6D28D9}
+.cell.chlay.grp1 .nm{color:#0F766E}
+.cell.chlay.grp2 .nm{color:#BE185D}
 
 /* 對位測試頁 */
 .sheet.test .cell{border:0.3mm dashed #999}
@@ -817,13 +822,34 @@ function normTag(s){
 function looksLikeCh(s){
   return /^(i ?郵箱|郵箱|郵局|中華郵政|7-?11|7-?eleven|統一超商|全家|family ?mart)$/i.test(s);
 }
-/* 通路統一成三種顯示名稱，順便決定顏色 */
+/* 同一張訂單（一起登記、一起付錢）的分組。
+   訊號來自登記表的「本筆應付」：有金額那列＝一組的開頭，後面空白的都跟它同一組。
+   2 人以上的組才上色，相鄰的組換顏色，一眼看得出哪幾張是一起的。 */
+var GROUPS = {};
+function buildGroups(rows){
+  GROUPS = {};
+  var blocks = [], cur = null, i;
+  for(i = 0; i < rows.length; i++){
+    if(String(rows[i].pay || "").trim() || !cur){ cur = []; blocks.push(cur); }
+    cur.push(rows[i].code);
+  }
+  var color = 0, b, k;
+  for(b = 0; b < blocks.length; b++){
+    if(blocks[b].length < 2) continue;          /* 自己一個人不用上色 */
+    for(k = 0; k < blocks[b].length; k++)
+      GROUPS[blocks[b][k]] = { c: color % 3, n: blocks[b].length };
+    color++;
+  }
+}
+
+/* 通路標籤。貼紙上只印一個字（i／7／全）—— 「7-ELEVEN」八個字會把名字擠掉，
+   底色框留著，一眼就分得出是哪一家。 */
 function chInfo(s){
   if(!s) return null;
-  if(/郵/.test(s))                    return { name: "i郵箱",   cls: "post" };
-  if(/7|eleven|統一/i.test(s))        return { name: "7-ELEVEN", cls: "seven" };
-  if(/全家|family/i.test(s))          return { name: "全家",     cls: "fami" };
-  return { name: s, cls: "other" };
+  if(/郵/.test(s))                    return { name: "i",  cls: "post" };
+  if(/7|eleven|統一/i.test(s))        return { name: "7",  cls: "seven" };
+  if(/全家|family/i.test(s))          return { name: "全", cls: "fami" };
+  return { name: s.charAt(0), cls: "other" };
 }
 function looksLikeCode(s){
   if(!s || s.length > 12) return false;
@@ -877,9 +903,11 @@ function barSvg(text, wMm, hMm){
 function cellEl(it, r, c, opt){
   var d = document.createElement("div");
   var isCh  = (opt.layout === "barch");
+  var grp = isCh ? GROUPS[it.code] : null;
   var isBar = (opt.layout === "bar" || opt.layout === "barbig" || isCh);
   var centered = (opt.layout === "nameonly" || opt.layout === "noqr");
-  d.className = "cell" + (isBar ? " vert" : (centered ? " center" : "")) + (isCh ? " chlay" : "");
+  d.className = "cell" + (isBar ? " vert" : (centered ? " center" : "")) +
+                (isCh ? " chlay" : "") + (grp ? " grp" + grp.c : "");
   d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
   d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
   d.style.width  = opt.cw + "mm";
@@ -1153,7 +1181,7 @@ function suggestNameSize(){
   var ch = num("ch", 29.7), v = $("layout").value, s;
   if(v === "nameonly")    s = Math.min(22, ch * 0.58);
   else if(v === "barbig") s = Math.min(16, ch * 0.44);
-  else if(v === "barch")  s = Math.min(15, ch * 0.40);   /* 通路小、備註中、姓名讓一點空間出來 */
+  else if(v === "barch")  s = Math.min(18, ch * 0.48);   /* 通路縮成一個字之後，寬度讓給姓名 */
   else if(v === "bar")    s = Math.min(13, ch * 0.34);
   else if(v === "qrbig")  s = Math.min(13, ch * 0.36);
   else if(v === "noqr")   s = Math.min(15, ch * 0.40);
@@ -1197,6 +1225,7 @@ window.addEventListener("DOMContentLoaded", function(){
       msg("⚠ 連不上試算表，用的是內建名單（" + (res.error || "沒有資料") + "）", "#c26a00");
       return;
     }
+    buildGroups(res.data);        /* 先算好同組，render 時上色 */
     var lines = [];
     for(var i = 0; i < res.data.length; i++){
       var p = res.data[i];
