@@ -99,16 +99,18 @@ button.w{background:#666}
 .cell.chlay .chl.other{background:#555}
 .cell.chlay .rem{font-size:5mm;font-weight:800;color:#000;max-width:24mm;overflow:hidden;
   white-space:nowrap;line-height:1.2}
-/* 2 組以上：整格淡黃底 ＋ 左上角「第幾張／共幾張」。
-   ⚠ 底色一樣要配 print-color-adjust:exact，不然列印時會被瀏覽器拿掉 */
-.cell.multi{background:#FFF3D6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+/* 2 組以上（同一個人要貼好幾張）＝ 名字換顏色。
+   底色留給「同一張訂單」用，兩個訊號才不會打架。 */
+.cell.multi .nm{color:#C2410C}
 .cell.multi .qb{position:absolute;top:0.7mm;left:1.6mm;font-size:3mm;font-weight:900;
   color:#B45309;line-height:1;letter-spacing:0.2mm}
-/* 同一張訂單（一起登記付錢）的名字上色，相鄰的組換顏色。
-   底色已經被「2 組以上」的淡黃用掉了，所以用文字顏色。 */
-.cell.chlay.grp0 .nm{color:#6D28D9}
-.cell.chlay.grp1 .nm{color:#0F766E}
-.cell.chlay.grp2 .nm{color:#BE185D}
+/* 同一張訂單（一起登記、一起付錢）＝ 整格淡色底，相鄰的組換顏色。
+   ⚠ 底色一定要配 print-color-adjust:exact，不然列印時瀏覽器會把它拿掉。 */
+.cell.chlay.grp0,.cell.chlay.grp1,.cell.chlay.grp2{
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cell.chlay.grp0{background:#FFF6DA}
+.cell.chlay.grp1{background:#E1EEFA}
+.cell.chlay.grp2{background:#E4F3E4}
 
 /* 對位測試頁 */
 .sheet.test .cell{border:0.3mm dashed #999}
