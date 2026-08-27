@@ -79,9 +79,11 @@ button.w{background:#666}
 /* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
    通路和備註都刻意做小 —— 走超商的是少數人，版面優先讓給姓名。 */
 .cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 2mm;text-align:left}
-.cell.chlay .toprow{display:flex;align-items:center;justify-content:space-between;
-  width:100%;gap:1.5mm;flex:0 0 auto}
-.cell.chlay .toprow .nmline{flex:1 1 auto;min-width:0;justify-content:flex-start}
+/* 姓名和右邊小字群「黏在一起」，不要一個推到最左、一個推到最右 ——
+   小字貼著紙邊有被裁掉的風險，而且看起來太散。 */
+.cell.chlay .toprow{display:flex;align-items:center;justify-content:flex-start;
+  width:100%;gap:2.5mm;flex:0 0 auto}
+.cell.chlay .toprow .nmline{flex:0 1 auto;min-width:0;justify-content:flex-start}
 .cell.chlay .side{flex:0 0 auto;display:flex;flex-direction:column;
   align-items:center;gap:0.5mm}
 /* 「第 N 張／共幾張」—— 跟通路標籤同一疊，放在最上面 */
