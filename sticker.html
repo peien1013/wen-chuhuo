@@ -84,6 +84,9 @@ button.w{background:#666}
 .cell.chlay .toprow .nmline{flex:1 1 auto;min-width:0;justify-content:flex-start}
 .cell.chlay .side{flex:0 0 auto;display:flex;flex-direction:column;
   align-items:center;gap:0.5mm}
+/* 「第 N 張／共幾張」—— 跟通路標籤同一疊，放在最上面 */
+.cell.chlay .qbs{font-size:3.4mm;font-weight:900;color:#B45309;line-height:1.2;
+  white-space:nowrap;letter-spacing:0.2mm}
 /* ⚠ 底色一定要配 print-color-adjust:exact，不然列印時瀏覽器會把它拿掉，變成白底白字 */
 .cell.chlay .chl{font-size:3.5mm;font-weight:800;color:#fff;line-height:1.25;
   padding:0.4mm 1.5mm;border-radius:1mm;white-space:nowrap;
@@ -893,10 +896,13 @@ function cellEl(it, r, c, opt){
     /* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
        通路上色，分成三堆時一眼看得出來。 */
     var ci = chInfo(it.ch);
+    /* 「第幾張／共幾張」放在右邊那疊的最上面，跟通路、備註排在一起，
+       左邊整塊留給姓名。使用者要的。 */
+    var qbSide = (it.qty > 1) ? '<div class="qbs">' + it.seq + " / " + it.qty + "</div>" : "";
     h += '<div class="toprow">' +
            '<div class="nmline" style="font-size:' + opt.nmm + 'mm">' +
              '<span class="nm">' + esc(it.name) + "</span></div>" +
-           '<div class="side">' +
+           '<div class="side">' + qbSide +
              (ci ? '<div class="chl ' + ci.cls + '">' + esc(ci.name) + "</div>" : "") +
              (it.tag ? '<div class="rem">' + esc(it.tag) + "</div>" : "") +
            "</div>" +
@@ -923,8 +929,9 @@ function cellEl(it, r, c, opt){
   /* 2 組以上：整格上色 ＋ 左上角標第幾張，貼的時候一眼看得出來這個人要貼好幾個。
      用絕對定位，才不會擠到姓名和條碼的版面。 */
   if(it.qty > 1){
+    /* 通路版面已經在右邊那疊標了，不要再標一次角落 */
     d.className += " multi";
-    h = '<div class="qb">' + it.seq + " / " + it.qty + "</div>" + h;
+    if(!isCh) h = '<div class="qb">' + it.seq + " / " + it.qty + "</div>" + h;
   }
   d.innerHTML = h;
   return d;
