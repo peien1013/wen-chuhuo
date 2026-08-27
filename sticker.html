@@ -1133,7 +1133,13 @@ function doPrint(){
 
 
 /* ---- 版面切換時給個合適的預設字級 ---- */
+/* 記住上次選的版面 —— 不然每次重開都跳回預設，使用者每次都要重選 */
+var LAYOUT_KEY = "wenChuhuoLayout";
+function saveLayout(v){ try { localStorage.setItem(LAYOUT_KEY, v); } catch(e){} }
+function lastLayout(){ try { return localStorage.getItem(LAYOUT_KEY) || ""; } catch(e){ return ""; } }
+
 function onLayoutChange(){
+  saveLayout($("layout").value);
   /* 通路版面：條碼壓矮一點（掃得到就好），空間讓給姓名 */
   if($("layout").value === "barch" && parseFloat($("barmm").value) > 8) $("barmm").value = 8;
   $("nmm").value = suggestNameSize();
@@ -1163,6 +1169,17 @@ window.addEventListener("DOMContentLoaded", function(){
   /* 先把「上次撈到的名單」畫出來（秒開），再去試算表拿最新的。
      Apps Script 一趟來回大概 1.5~5 秒，不先畫的話開頁就是在乾等。 */
   if(!$("list").value.trim()) $("list").value = lastList() || DEFAULT_NAMES;
+  /* 先套用上次選的版面，再綁事件 */
+  /* 沒存過就直接給通路版面 —— 這批就是要印通路 */
+  var lay = lastLayout() || "barch";
+  if(lay){
+    var opts = $("layout").options, ok = false, z;
+    for(z = 0; z < opts.length; z++) if(opts[z].value === lay) ok = true;
+    if(ok){
+      $("layout").value = lay;
+      if(lay === "barch" && parseFloat($("barmm").value) > 8) $("barmm").value = 8;
+    }
+  }
   $("layout").addEventListener("change", onLayoutChange);
   var ids = ["cols","rows","cw","ch","ml","mt","gx","gy","qrmm","barmm","nmm","skip",
              "copies","prefix","startNo","pad","cutline"];
