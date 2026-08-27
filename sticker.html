@@ -79,7 +79,9 @@ button.w{background:#666}
 /* 通路版面：姓名靠左大字，右邊疊「通路／備註」兩行，條碼橫跨最下面。
    通路和備註都刻意做小 —— 走超商的是少數人，版面優先讓給姓名。 */
 /* 左右留 4mm ——「無邊界列印」實際上印不到紙的最邊邊，內容太靠邊會被切掉 */
-.cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 4mm;text-align:left}
+/* 左右各留 6mm —— 3 欄 × 70mm ＝ 210mm 剛好是 A4 全寬，最外圈的格子邊緣就是紙邊，
+   噴墨印不到那裡。內容一定要退進來，不然最左的姓和最右的備註會被切掉。 */
+.cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 6mm;text-align:left}
 /* 姓名和右邊小字群「黏在一起」，不要一個推到最左、一個推到最右 ——
    小字貼著紙邊有被裁掉的風險，而且看起來太散。 */
 .cell.chlay .toprow{display:flex;align-items:center;justify-content:flex-start;
@@ -944,7 +946,7 @@ function cellEl(it, r, c, opt){
            "</div>" +
          "</div>";
     /* 條碼也跟著往內縮，跟上面的 4mm 邊界對齊 */
-    h += '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 8.8), opt.barmm) + "</div>";
+    h += '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 13), opt.barmm) + "</div>";
   } else if(isBar){
     /* 姓名在上、條碼在下 */
     var bw = Math.max(10, opt.cw - 4.4);
@@ -1188,7 +1190,7 @@ function suggestNameSize(){
   var ch = num("ch", 29.7), v = $("layout").value, s;
   if(v === "nameonly")    s = Math.min(22, ch * 0.58);
   else if(v === "barbig") s = Math.min(16, ch * 0.44);
-  else if(v === "barch")  s = Math.min(18, ch * 0.48);   /* 通路縮成一個字之後，寬度讓給姓名 */
+  else if(v === "barch")  s = Math.min(15, ch * 0.40);   /* 左右退 6mm 之後姓名跟著縮，塞得下比較重要 */
   else if(v === "bar")    s = Math.min(13, ch * 0.34);
   else if(v === "qrbig")  s = Math.min(13, ch * 0.36);
   else if(v === "noqr")   s = Math.min(15, ch * 0.40);
