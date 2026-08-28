@@ -133,6 +133,52 @@ a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以�
 .src > summary .fh{font-size:14px;font-weight:600;color:#b39763;margin-left:auto}
 .src[open] > summary .fh{display:none}
 .src[open] > summary{margin-bottom:12px}
+/* 🧪 欄位設計器：讓使用者自己改標題、加減欄位，馬上看到系統認不認得。
+   認欄位的規則和順序跟後端 roster_() 完全一樣，改後端記得同步改 LAB_ROLES。 */
+.lab .labtip{font-size:15px;line-height:1.9;margin:0 0 12px;color:#5b4a2e}
+.labbtns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.labbtns .sp{flex:1 1 auto}
+.labbtns .tbtn{font-size:14px;padding:7px 14px}
+.labwrap{overflow-x:auto;padding-bottom:4px}
+.labtb{border-collapse:separate;border-spacing:6px 0;font-size:15px}
+.labtb td{vertical-align:middle;padding:0}
+.labtb .cmove{white-space:nowrap;text-align:center;padding-bottom:4px}
+.labtb .cmove button{font-size:13px;font-weight:800;line-height:1;padding:3px 6px;margin:0 1px;
+  border:1px solid #ddd;border-radius:6px;background:#fff;color:#888;cursor:pointer;font-family:inherit}
+.labtb .cmove button:hover{border-color:#c26a00;color:#c26a00}
+.labtb .cmove button.del:hover{border-color:#c00;color:#c00}
+.labtb input{width:132px;font-size:15px;padding:7px 8px;border:1px solid #ccc;
+  border-radius:7px;font-family:inherit;background:#fff}
+.labtb .hd input{font-weight:800;background:#fffdf5;border-color:#e0c48a}
+.labtb .dt input{color:#555}
+.labtb .badge{display:block;text-align:center;font-size:13px;font-weight:800;
+  padding:4px 6px;border-radius:6px;margin:5px 0 7px}
+.labtb .badge.ok{background:#e6f6ec;color:#0d7a3c}
+.labtb .badge.no{background:#f1f1f1;color:#999}
+.labout{margin-top:16px;background:#fff;border:1px solid #ecd9ae;border-radius:10px;padding:14px 16px}
+.labout h4{margin:0 0 9px;font-size:16px;color:#c26a00}
+.labout .rolelist{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.labout .r{font-size:14px;font-weight:700;padding:4px 11px;border-radius:20px}
+.labout .r.on{background:#e6f6ec;color:#0d7a3c}
+.labout .r.off{background:#fdeaea;color:#b03030}
+.labout .warn{font-size:14px;line-height:1.9;color:#8a6d3b}
+.labout .warn b{color:#c26a00}
+/* 貼紙預覽：故意做得跟真的貼紙一樣，一眼就知道哪一欄印在哪 */
+.labprev{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin:6px 0 12px}
+.labst{width:250px;border:2px solid #ccc;border-radius:8px;padding:9px 11px;background:#fff}
+.labst .l1{display:flex;align-items:center;gap:9px}
+.labst .nm{font-size:25px;font-weight:900;color:#111;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.labst .tg{font-size:14px;font-weight:800;color:#7a4a00;background:#ffe08a;
+  padding:1px 7px;border-radius:5px;white-space:nowrap}
+.labst .ch{font-size:14px;font-weight:900;color:#fff;padding:1px 8px;border-radius:5px}
+.labst .ch.post{background:#00913A} .labst .ch.seven{background:#F07000}
+.labst .ch.fami{background:#0F6FE0} .labst .ch.self{background:#999}
+.labst .bar{height:20px;margin-top:7px;border-radius:2px;background:repeating-linear-gradient(
+  90deg,#111 0 2px,#fff 2px 4px,#111 4px 5px,#fff 5px 8px,#111 8px 11px,#fff 11px 13px)}
+.labst .cd{font-size:13px;font-weight:700;color:#888;letter-spacing:2px;margin-top:3px}
+.labnote{font-size:14px;line-height:1.9;color:#666;max-width:360px}
+.labnote b{color:#c26a00}
 .srcnow{font-size:19px;font-weight:800;color:#111;line-height:1.7;
   background:#fff;border:1px solid #ecd7a8;border-radius:10px;padding:12px 16px}
 .srcnow .big{font-size:22px;color:#c26a00}
@@ -274,6 +320,25 @@ ul.cols li{margin-bottom:5px}
         ⚠ <b>通路欄不要寫「7-11」</b>，Google 試算表會把它吃成日期 2026/7/11，請寫 <b>7-ELEVEN</b>。<br>
         試算表改完存檔就好，<b>姓名貼紙頁</b>和<b>掃碼核對頁</b>下次打開自動撈最新的，程式碼完全不用碰。<br>
         <span class="dim">（沒網路時會自動用內建的舊名單，畫面上會標示，不會卡住。）</span>
+      </div>
+    </details>
+
+    <details class="srchelp lab">
+      <summary>🧪 自己試試看：欄位要怎麼取名，系統才看得懂　<span class="dim">（點一下打開）</span></summary>
+      <div class="srchelpin">
+        <p class="labtip">
+          把下面的<b>標題</b>改成你打算用的字，<b>下面會馬上告訴你系統認不認得</b>。<br>
+          欄位可以<b>加、刪、左右搬</b> —— 搬給你看就知道：<b>順序真的不重要</b>，它只看標題文字。
+        </p>
+        <div class="labbtns">
+          <button type="button" class="tbtn" onclick="labPreset('min')">最少可以這樣（3 欄）</button>
+          <button type="button" class="tbtn" onclick="labPreset('full')">建議這樣（6 欄）</button>
+          <button type="button" class="tbtn" onclick="labPreset('real')">這次靈芝蟲草的樣子</button>
+          <span class="sp"></span>
+          <button type="button" class="tbtn primary" onclick="labAdd()">＋ 加一欄</button>
+        </div>
+        <div class="labwrap"><table class="labtb" id="labTb"></table></div>
+        <div class="labout" id="labOut"></div>
       </div>
     </details>
   </details>
@@ -656,6 +721,153 @@ function resetSource(){
   });
 }
 
+
+/* ===== 🧪 欄位設計器 =====
+   認欄位的規則和「先後順序」跟後端 roster_() 一模一樣（組數要排在編號前面認，
+   因為兩個都可能寫成純數字的欄）。後端改了這裡也要跟著改，不然會騙人。 */
+var LAB_ROLES = [
+  { k:"qty",  n:"組數",     re:/組數|數量|份數|件數|幾組/ },
+  { k:"pay",  n:"本筆應付", re:/應付|應收/ },
+  { k:"when", n:"登記時間", re:/登記時間|時間戳|填答時間|timestamp/i },
+  { k:"code", n:"編號",     re:/編號|代號|序號|條碼/ },
+  { k:"ch",   n:"領取方式", re:/通路|超商|寄送方式|物流/ },
+  { k:"box",  n:"關係人",   re:/同箱|箱主|收件人/ },
+  { k:"tag",  n:"用途分類", re:/分類|類別|團別|項目|品項|備註/ },
+  { k:"name", n:"姓名",     re:/姓名|名字|訂購人|會員/ }
+];
+var LAB_PRESETS = {
+  min: [
+    { h:"姓名",   d:["王小明","陳美玲"] },
+    { h:"分類",   d:["日本","疫情"] },
+    { h:"組數",   d:["1","2"] }
+  ],
+  full: [
+    { h:"姓名",     d:["王小明","陳美玲"] },
+    { h:"分類",     d:["日本","疫情"] },
+    { h:"編號",     d:["S001","S002"] },
+    { h:"通路",     d:["i郵箱","7-ELEVEN"] },
+    { h:"組數",     d:["1","2"] },
+    { h:"同箱",     d:["王小明","陳美玲"] }
+  ],
+  real: [
+    { h:"登記時間",     d:["2026-08-19 09:28","2026-08-19 10:41"] },
+    { h:"訂購人",       d:["王小明","陳美玲"] },
+    { h:"組數",         d:["1","2"] },
+    { h:"本筆應付",     d:["9100",""] },
+    { h:"超商通路",     d:["i郵箱","7-ELEVEN"] },
+    { h:"收件人姓名",   d:["王小明","王小明"] },
+    { h:"備註",         d:["日本行","疫情需要"] },
+    { h:"編號",         d:["S001","S002"] }
+  ]
+};
+var LAB = LAB_PRESETS.full.map(function(c){ return { h:c.h, d:c.d.slice() }; });
+
+/* 每一欄配到哪個角色。一欄只能配一個、一個角色只被最先出現的那欄搶走 —— 後端就是這樣寫的 */
+function labMatch(){
+  var byCol = [], taken = {}, i, r;
+  for(i = 0; i < LAB.length; i++){
+    byCol[i] = null;
+    var t = String(LAB[i].h || "").trim();
+    if(!t) continue;
+    for(r = 0; r < LAB_ROLES.length; r++){
+      if(taken[LAB_ROLES[r].k]) continue;
+      if(LAB_ROLES[r].re.test(t)){ byCol[i] = LAB_ROLES[r]; taken[LAB_ROLES[r].k] = i + 1; break; }
+    }
+  }
+  return { byCol: byCol, taken: taken };
+}
+
+function labRender(){
+  var m = labMatch(), i, h = "";
+  /* ── 表格：搬移鈕／標題／認到什麼／兩列範例資料 ── */
+  h += '<tr>';
+  for(i = 0; i < LAB.length; i++)
+    h += '<td class="cmove">' +
+         '<button type="button" onclick="labMove(' + i + ',-1)" title="往左搬">←</button>' +
+         '<button type="button" class="del" onclick="labDel(' + i + ')" title="刪掉這欄">✕</button>' +
+         '<button type="button" onclick="labMove(' + i + ',1)" title="往右搬">→</button></td>';
+  h += '</tr><tr>';
+  for(i = 0; i < LAB.length; i++)
+    h += '<td class="hd"><input value="' + escHtml(LAB[i].h) +
+         '" oninput="labSetH(' + i + ',this.value)" placeholder="標題"></td>';
+  h += '</tr><tr>';
+  for(i = 0; i < LAB.length; i++)
+    h += '<td>' + (m.byCol[i]
+        ? '<span class="badge ok">✅ ' + m.byCol[i].n + '</span>'
+        : '<span class="badge no">系統用不到</span>') + '</td>';
+  h += '</tr>';
+  for(var row = 0; row < 2; row++){
+    h += '<tr>';
+    for(i = 0; i < LAB.length; i++)
+      h += '<td class="dt"><input value="' + escHtml(LAB[i].d[row] || "") +
+           '" oninput="labSetD(' + i + ',' + row + ',this.value)"></td>';
+    h += '</tr>';
+  }
+  document.getElementById("labTb").innerHTML = h;
+
+  /* ── 下面的結論 ── */
+  var must = ["name","tag","ch","qty","code","box"], o = "";
+  o += '<h4>系統會這樣讀你的表</h4><div class="rolelist">';
+  for(i = 0; i < must.length; i++){
+    var role = null, r;
+    for(r = 0; r < LAB_ROLES.length; r++) if(LAB_ROLES[r].k === must[i]) role = LAB_ROLES[r];
+    var at = m.taken[must[i]];
+    o += '<span class="r ' + (at ? "on" : "off") + '">' + role.n +
+         (at ? "＝第 " + at + " 欄" : "：沒有") + '</span>';
+  }
+  o += '</div>';
+
+  /* 貼紙預覽：拿第一列範例資料，照真的貼紙排一次 */
+  function cell(k, row){ var c = m.taken[k]; return c ? String(LAB[c-1].d[row] || "").trim() : ""; }
+  var nm  = cell("name",0) || (LAB.length ? String(LAB[0].d[0] || "").trim() : "");
+  var tg  = cell("tag",0), ch = cell("ch",0), cd = cell("code",0) || "S001";
+  var qty = parseInt(cell("qty",0), 10); if(!(qty > 0)) qty = 1;
+  var chc = !ch ? "self" : (ch.indexOf("郵") >= 0 ? "post"
+          : (/7|eleven/i.test(ch) ? "seven" : (/全家|family/i.test(ch) ? "fami" : "self")));
+  var chl = !ch ? "自取" : (chc === "post" ? "i" : chc === "seven" ? "7" : chc === "fami" ? "全" : ch);
+  o += '<h4>那張貼紙就會長這樣</h4><div class="labprev"><div class="labst">' +
+       '<div class="l1"><span class="nm">' + escHtml(nm || "（沒有姓名）") + '</span>' +
+       (tg ? '<span class="tg">' + escHtml(tg) + '</span>' : "") +
+       '<span class="ch ' + chc + '">' + escHtml(chl) + '</span></div>' +
+       '<div class="bar"></div><div class="cd">' + escHtml(cd) + '</div></div>' +
+       '<div class="labnote">第 1 位（<b>' + escHtml(nm || "?") + '</b>）會印 <b>' + qty +
+       '</b> 張貼紙。<br>大字＝姓名，黃底小字＝分類，彩色小框＝領取方式，下面那條＝編號做成的條碼。</div></div>';
+
+  /* 提醒：缺哪一欄會怎樣，講後果不要只講「缺了」 */
+  var w = [];
+  if(!m.taken.name) w.push("沒認出<b>姓名</b>欄 → 系統會直接拿<b>第 1 欄</b>當姓名。標題寫「姓名」「名字」「訂購人」都認得。");
+  if(!m.taken.code) w.push("沒有<b>編號</b>欄 → 會自動幫你編 S001、S002⋯（可以，但<b>之後名單中間插人號碼會全部位移</b>，建議自己開一欄）。");
+  if(!m.taken.qty)  w.push("沒有<b>組數</b>欄 → <b>每人只印 1 張</b>。有人訂 2 組以上就會少印。");
+  if(!m.taken.ch)   w.push("沒有<b>領取方式</b>欄 → 全部當<b>自取</b>，核對頁不會分 i郵箱／7-11／全家。");
+  if(!m.taken.box)  w.push("沒有<b>關係人</b>欄 → 核對頁不會顯示「放進誰的箱子」。一箱裝好幾個人時會找不到。");
+  var dup = {}, dupmsg = [];
+  for(i = 0; i < LAB.length; i++){
+    var t2 = String(LAB[i].h || "").trim();
+    if(!t2) continue;
+    if(dup[t2]) dupmsg.push("有兩欄都叫「<b>" + escHtml(t2) + "</b>」→ 只有<b>比較左邊</b>那欄會被採用。");
+    dup[t2] = 1;
+  }
+  w = w.concat(dupmsg);
+  w.push("⚠ 領取方式欄<b>不要寫「7-11」</b>，Google 試算表會吃成日期 2026/7/11。寫 <b>7-ELEVEN</b>。");
+  w.push("第一列一定要是<b>標題</b>，資料從第二列開始。名單中間<b>不要空兩列以上</b>，會被當成到此為止。");
+  o += '<h4>提醒</h4><div class="warn">· ' + w.join("<br>· ") + '</div>';
+  document.getElementById("labOut").innerHTML = o;
+}
+function labSetH(i, v){ LAB[i].h = v; labRender(); }
+function labSetD(i, r, v){ LAB[i].d[r] = v; labRender(); }
+function labAdd(){ LAB.push({ h:"", d:["",""] }); labRender(); }
+function labDel(i){ if(LAB.length <= 1) return; LAB.splice(i, 1); labRender(); }
+function labMove(i, d){
+  var j = i + d;
+  if(j < 0 || j >= LAB.length) return;
+  var t = LAB[i]; LAB[i] = LAB[j]; LAB[j] = t;
+  labRender();
+}
+function labPreset(k){
+  LAB = LAB_PRESETS[k].map(function(c){ return { h:c.h, d:c.d.slice() }; });
+  labRender();
+}
+labRender();
 loadSource();
 </script>
 </body>
