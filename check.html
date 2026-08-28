@@ -48,6 +48,10 @@ h1{font-size:26px;margin:0 0 3px}
 .ch.fami{background:#0F6FE0}
 /* 自取（沒有通路）—— 用灰色跟三家超商區隔開 */
 .ch.self{background:#6B7280}
+/* 自取模式的三堆：疫情／日本／其他 */
+.ch.tagE{background:#B45309}
+.ch.tagJ{background:#0F6FE0}
+.ch.tagO{background:#6B7280}
 #bigShip{margin-top:12px;font-size:27px;font-weight:800;line-height:1.3}
 #bigShip .ch{font-size:26px;padding:3px 16px}
 #bigShip .box{margin-left:12px;color:#222}
@@ -61,6 +65,13 @@ h1{font-size:26px;margin:0 0 3px}
 #board.idle #bigName{font-size:30px;color:#999;font-weight:700;letter-spacing:1px}
 
 /* ---- 進度 ---- */
+/* 郵寄／自取切換 —— 249 組裡有 193 組是自取，混在一起很難確認有沒有漏 */
+.modes{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.modes .mode{font-size:19px;font-weight:800;padding:11px 24px;border:2px solid #ccc;
+  border-radius:10px;background:#fff;color:#666;cursor:pointer;font-family:inherit}
+.modes .mode:hover{border-color:#999}
+.modes .mode.on{background:#7b3fd4;border-color:#7b3fd4;color:#fff}
+.modehint{font-size:16px;color:#777;font-weight:700}
 .bar{background:#fff;border:1px solid var(--line);border-radius:12px;
   padding:14px 18px;margin-bottom:14px}
 .barTop{display:flex;justify-content:space-between;align-items:baseline;
@@ -152,6 +163,13 @@ details summary{cursor:pointer;font-size:16px;font-weight:700;padding:5px 0}
     <div id="bigCode"></div>
     <div id="bigShip"></div>
     <div id="bigMsg"></div>
+  </div>
+
+  <div class="modes">
+    <button id="mAll"  class="mode on" onclick="setFilter('all')">全部</button>
+    <button id="mShip" class="mode"    onclick="setFilter('ship')">🚚 要郵寄</button>
+    <button id="mSelf" class="mode"    onclick="setFilter('self')">🏠 自取</button>
+    <span class="modehint" id="modeHint"></span>
   </div>
 
   <div class="bar">
@@ -426,10 +444,36 @@ function buildRoster(){
 /* 一個人訂幾組就要掃幾組（試算表的「組數」欄）。
    掃滿 qty 次才算完成 —— 不然 8 組的人掃第 2 張就會被當成重複掃。 */
 function mark(p){ p.scanned = (p.hits >= (p.qty || 1)); }
-function totalQty(){ var n = 0, i; for(i=0;i<ROSTER.length;i++) n += (ROSTER[i].qty || 1); return n; }
+
+/* 郵寄／自取切換。自取那 193 組主要是拿來「確認貼紙有沒有印齊」——
+   全部混在一起看不出漏了誰。有通路＝要郵寄，通路空白＝自取。
+   網址加 ?only=self 或 ?only=ship 可以直接進那個模式（桌面捷徑用）。 */
+var FILTER = "all";
+function isShip(p){ return !!String(p.ch || "").trim(); }
+function inFilter(p){
+  if(FILTER === "all") return true;
+  return FILTER === "ship" ? isShip(p) : !isShip(p);
+}
+function setFilter(f){
+  FILTER = f;
+  var ids = { all:"mAll", ship:"mShip", self:"mSelf" }, k;
+  for(k in ids) $(ids[k]).className = "mode" + (k === f ? " on" : "");
+  $("modeHint").textContent =
+    f === "ship" ? "只算要寄的（i郵箱／7-11／全家）" :
+    f === "self" ? "只算自取的 —— 拿來確認貼紙印齊了沒" : "";
+  renderList();
+}
+function totalQty(){
+  var n = 0, i;
+  for(i=0;i<ROSTER.length;i++) if(inFilter(ROSTER[i])) n += (ROSTER[i].qty || 1);
+  return n;
+}
 function doneQty(){
   var n = 0, i, q;
-  for(i=0;i<ROSTER.length;i++){ q = ROSTER[i].qty || 1; n += Math.min(ROSTER[i].hits || 0, q); }
+  for(i=0;i<ROSTER.length;i++){
+    if(!inFilter(ROSTER[i])) continue;
+    q = ROSTER[i].qty || 1; n += Math.min(ROSTER[i].hits || 0, q);
+  }
   return n;
 }
 
@@ -456,6 +500,27 @@ function load(){
 
 /* ---- 畫面 ---- */
 /* 通路顯示順序：郵局 → 7-11 → 全家，跟試算表「郵寄出貨」一致 */
+/* 自取模式改成照「分類」分三堆（疫情／日本／其他），因為使用者是照分類分堆放。
+   郵寄模式還是照通路分（i郵箱／7-11／全家）。 */
+function groupKey(p){
+  if(FILTER === "self"){
+    var t = String(p.tag || "");
+    if(/疫情|防疫|新冠|仙丹/.test(t)) return "疫情";
+    if(/日本|橫濱|沖繩/.test(t))      return "日本";
+    return "其他";
+  }
+  return p.ch || "自取";
+}
+var TAG_ORDER = [/^疫情$/, /^日本$/, /^其他$/];
+/* 欄位標題的色塊。自取模式是分類（疫情／日本／其他），郵寄模式是通路 */
+function headChip(c){
+  if(c === "疫情") return '<span class="ch tagE">疫情</span>';
+  if(c === "日本") return '<span class="ch tagJ">日本</span>';
+  if(c === "其他") return '<span class="ch tagO">其他／空白</span>';
+  if(c === "自取") return '<span class="ch self">🏠 自取</span>';
+  return chChip(c);
+}
+
 /* 通路顯示順序。試算表可能寫「7-11」也可能寫「7-ELEVEN」，
    所以比對用關鍵字，不要用完全相等，不然那一欄會被丟到最後面。 */
 var CH_ORDER = [/郵|post/i, /7|eleven|711/i, /全家|family|fami/i];
@@ -476,15 +541,16 @@ function cardHtml(p, flashCode, extraCls){
 function renderList(flashCode){
   var groups = {}, order = [], i, c, p;
   for(i = 0; i < ROSTER.length; i++){
-    /* 沒填通路＝自取（登記表「超商通路」空白的那些人） */
-    c = ROSTER[i].ch || "自取";
+    if(!inFilter(ROSTER[i])) continue;
+    c = groupKey(ROSTER[i]);
     if(!groups[c]) groups[c] = [];
     groups[c].push(ROSTER[i]);
   }
   var keys = Object.keys(groups);
-  for(i = 0; i < CH_ORDER.length; i++){
+  var ORD = (FILTER === "self") ? TAG_ORDER : CH_ORDER;
+  for(i = 0; i < ORD.length; i++){
     for(var ki = 0; ki < keys.length; ki++){
-      if(order.indexOf(keys[ki]) < 0 && CH_ORDER[i].test(keys[ki])) order.push(keys[ki]);
+      if(order.indexOf(keys[ki]) < 0 && ORD[i].test(keys[ki])) order.push(keys[ki]);
     }
   }
   Object.keys(groups).forEach(function(k){ if(order.indexOf(k) < 0) order.push(k); });
@@ -500,7 +566,7 @@ function renderList(flashCode){
       if(list[i].box) boxes[list[i].box] = 1;
     }
     var nBox = Object.keys(boxes).length;
-    h += '<div class="gcol"><div class="ghead">' + (c === "自取" ? '<span class="ch self">🏠 自取</span>' : chChip(c)) +
+    h += '<div class="gcol"><div class="ghead">' + headChip(c) +
          '<span class="gcount">' + done + " / " + all + " 組" +
          (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
@@ -705,15 +771,18 @@ function manualAsk(){
 function copyMissing(){
   var miss = [], i;
   for(i=0; i<ROSTER.length; i++)
-    if(!ROSTER[i].scanned){
+    if(!ROSTER[i].scanned && inFilter(ROSTER[i])){
       var q = ROSTER[i].qty || 1, h = ROSTER[i].hits || 0;
-      miss.push(ROSTER[i].code + " " + ROSTER[i].name +
-                (q > 1 ? "（還差 " + (q - h) + " / " + q + " 組）" : ""));
+      /* 格式跟姓名貼紙頁的名單一樣，複製完可以直接貼回去補印 */
+      var p = ROSTER[i];
+      miss.push(p.name + "," + (p.tag || "") + "," + p.code + "," + (p.ch || "") +
+                ((q - h) > 1 ? ",x" + (q - h) : ""));
     }
   var txt = miss.length ? miss.join("\n") : "（全部都掃到了）";
   try{
     navigator.clipboard.writeText(txt);
-    board("idle", "未掃名單已複製（" + miss.length + " 個）", "", "貼到 LINE 或記事本都可以");
+    board("idle", "未掃名單已複製（" + miss.length + " 筆）", "",
+          "可以直接貼回「姓名貼紙」頁的名單欄，只補印缺的那幾張");
   }catch(e){
     window.prompt("複製這段：", txt);
   }
@@ -819,6 +888,10 @@ window.addEventListener("DOMContentLoaded", function(){
     }
     renderList();
   }
+  /* 網址帶 ?only=self / ?only=ship 就直接進那個模式（桌面捷徑用） */
+  var qm = (location.search || "").match(/only=(self|ship|all)/);
+  if(qm) setFilter(qm[1]);
+
   api({ action: "roster" }, function(r){ rosterRes = r; bothBack(); });
   api({ action: "list"   }, function(r){ listRes   = r; bothBack(); });
   if(!lsAvailable()){
