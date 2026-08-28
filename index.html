@@ -947,10 +947,12 @@ try {
 
 function laySave(){ try { localStorage.setItem(LAY_KEY, JSON.stringify(LAY)); } catch(e){} }
 function layClamp(){
-  LAY.cw    = Math.min(200, Math.max(25, LAY.cw));
-  LAY.ch    = Math.min(150, Math.max(14, LAY.ch));
-  LAY.nmm   = Math.min(30,  Math.max(4,  LAY.nmm));
-  LAY.barmm = Math.min(20,  Math.max(4,  LAY.barmm));
+  /* 一併四捨五入到小數一位 —— 拖出來的是浮點數，87.63895142118228 填進規格欄很醜也沒意義 */
+  function r1(v){ return Math.round(v * 10) / 10; }
+  LAY.cw    = r1(Math.min(200, Math.max(25, LAY.cw)));
+  LAY.ch    = r1(Math.min(150, Math.max(14, LAY.ch)));
+  LAY.nmm   = r1(Math.min(30,  Math.max(4,  LAY.nmm)));
+  LAY.barmm = r1(Math.min(20,  Math.max(4,  LAY.barmm)));
 }
 
 function dragRender(){
