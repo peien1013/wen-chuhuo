@@ -240,6 +240,7 @@ ul.cols li{margin-bottom:5px}
 
     <div class="srcback">
       <button type="button" class="tbtn" onclick="resetSource()">↩ 換回原本那份（2026靈芝蟲草登記）</button>
+      <button type="button" class="tbtn" onclick="fillCodes()" title="剛登記進來的人如果編號是空的，貼紙會印不出條碼；按這顆幫他們補上">🔢 幫新的人補編號</button>
       <span class="srchint">換一次就好，兩台電腦都會跟著換。</span>
     </div>
 
@@ -618,6 +619,18 @@ function applySource(){
     srcMsg("✅ 換好了：《" + escHtml(r.ssName) + "》→「" + escHtml(r.sheet) +
            "」，讀到 " + r.count + " 人。", "#00913A");
     document.getElementById("srcUrl").value = "";
+    loadSource();
+  });
+}
+
+/* 新登記進來的人，編號欄常常是空的 → 貼紙就印不出條碼。
+   這顆按鈕請後台從最大號往下接著補，已經有號碼的一律不動。 */
+function fillCodes(){
+  srcMsg("正在看有沒有人沒編號…", "#7b3fd4");
+  api({ action:"assigncodes" }, function(r){
+    if(!r.ok){ srcMsg("✖ " + escHtml(r.error || "補不了"), "#c00"); return; }
+    if(!r.added){ srcMsg("✅ 每個人都有編號了，不用補。", "#00913A"); return; }
+    srcMsg("✅ 補好 " + r.added + " 個編號。這幾位的貼紙要重印一次才有條碼。", "#00913A");
     loadSource();
   });
 }
