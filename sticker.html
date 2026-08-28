@@ -1198,10 +1198,18 @@ var LIST_CACHE = "wenChuhuoListCache";
 function lastList(){ try { return localStorage.getItem(LIST_CACHE) || ""; } catch(e){ return ""; } }
 function saveList(v){ try { localStorage.setItem(LIST_CACHE, v); } catch(e){} }
 
+/* 核對頁按「拿未掃的去印貼紙」丟過來的名單。同網域用 localStorage 交接，
+   不走剪貼簿（使用者中途複製別的東西就會蓋掉）。
+   一次性：讀完就刪，重新整理才不會一直卡在那份缺件名單。 */
+var HANDOFF_KEY = "wenChuhuoPrintList";
+var HANDOFF = null;
+try { HANDOFF = localStorage.getItem(HANDOFF_KEY); localStorage.removeItem(HANDOFF_KEY); } catch(e){}
+
 window.addEventListener("DOMContentLoaded", function(){
   /* 先把「上次撈到的名單」畫出來（秒開），再去試算表拿最新的。
      Apps Script 一趟來回大概 1.5~5 秒，不先畫的話開頁就是在乾等。 */
-  if(!$("list").value.trim()) $("list").value = lastList() || DEFAULT_NAMES;
+  if(HANDOFF) $("list").value = HANDOFF;
+  else if(!$("list").value.trim()) $("list").value = lastList() || DEFAULT_NAMES;
   /* 先套用上次選的版面，再綁事件 */
   /* 沒存過就直接給通路版面 —— 這批就是要印通路 */
   var lay = lastLayout() || "barch";
@@ -1222,13 +1230,26 @@ window.addEventListener("DOMContentLoaded", function(){
   render();
 
   /* 去試算表撈最新名單（撈不到就維持內建的，不影響使用） */
-  msg("正在跟試算表要最新名單…", "#0f6fe0");
+  msg(HANDOFF ? "已帶入核對頁的未掃名單，正在跟試算表對顏色…"
+              : "正在跟試算表要最新名單…", "#0f6fe0");
   api({ action: "roster" }, function(res){
     if(!res.ok || !res.data || !res.data.length){
       msg("⚠ 連不上試算表，用的是內建名單（" + (res.error || "沒有資料") + "）", "#c26a00");
       return;
     }
     buildGroups(res.data);        /* 先算好同組，render 時上色 */
+
+    /* 從核對頁帶名單過來的時候，名單就是那份缺件的，不要被整份 238 人蓋掉。
+       但上面的 buildGroups 還是要跑完，同組的淡色底才會對。
+       也不存進 LIST_CACHE —— 那是「上次的完整名單」，別被缺件名單汙染。 */
+    if(HANDOFF){
+      render();
+      msg("✅ 已帶入未掃名單 " + $("list").value.split("\n").filter(function(s){
+            return s.trim();
+          }).length + " 筆，直接按「🖨 列印」就好", "#00913A");
+      return;
+    }
+
     var lines = [];
     for(var i = 0; i < res.data.length; i++){
       var p = res.data[i];

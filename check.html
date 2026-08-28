@@ -72,6 +72,9 @@ h1{font-size:26px;margin:0 0 3px}
 .modes .mode:hover{border-color:#999}
 .modes .mode.on{background:#7b3fd4;border-color:#7b3fd4;color:#fff}
 .modehint{font-size:16px;color:#777;font-weight:700}
+/* 「拿未掃的去印貼紙」是接下來最常按的那顆，給它顏色，不要跟其他灰按鈕混在一起 */
+.btns .g.go{background:#7b3fd4;border-color:#7b3fd4;color:#fff}
+.btns .g.go:hover{filter:brightness(1.1)}
 /* 第二排：已掃／未掃。跟通路那排是「兩個條件同時成立」，不是互相取代 */
 .modes.sub2{margin:-6px 0 16px}
 .modes.sub2 .mode{font-size:17px;padding:9px 18px}
@@ -221,6 +224,7 @@ details summary{cursor:pointer;font-size:16px;font-weight:700;padding:5px 0}
     <span id="gunState" class="off">未啟用</span>
     <span id="sync" class="off">未連線</span>
     <button class="ghost" onclick="manualAsk()">✎ 手動補登</button>
+    <button class="g go" onclick="printMissing()" title="把還沒掃到的人直接帶去「姓名貼紙」頁，開好就能印">🏷 拿未掃的去印貼紙</button>
     <button class="g" onclick="copyMissing()">⧉ 複製未掃名單</button>
     <button class="g" onclick="resetAll()">↺ 全部重來</button>
     <span style="display:inline-flex;align-items:center;gap:7px;margin-left:6px">
@@ -872,16 +876,22 @@ function manualAsk(){
   var v = window.prompt("手動補登：輸入編號（例 S007）");
   if(v) lookup(v);
 }
+/* 未掃名單（含還差幾張），核對頁的「複製」和「拿去印」共用同一份 */
+function missingLines(){
+  var out = [], i, p, q, h;
+  for(i = 0; i < ROSTER.length; i++){
+    p = ROSTER[i];
+    if(p.scanned || !inFilter(p)) continue;
+    q = p.qty || 1; h = p.hits || 0;
+    /* 格式跟姓名貼紙頁的名單一樣，貼回去就能直接補印 */
+    out.push(p.name + "," + (p.tag || "") + "," + p.code + "," + (p.ch || "") +
+             ((q - h) > 1 ? ",x" + (q - h) : ""));
+  }
+  return out;
+}
+
 function copyMissing(){
-  var miss = [], i;
-  for(i=0; i<ROSTER.length; i++)
-    if(!ROSTER[i].scanned && inFilter(ROSTER[i])){
-      var q = ROSTER[i].qty || 1, h = ROSTER[i].hits || 0;
-      /* 格式跟姓名貼紙頁的名單一樣，複製完可以直接貼回去補印 */
-      var p = ROSTER[i];
-      miss.push(p.name + "," + (p.tag || "") + "," + p.code + "," + (p.ch || "") +
-                ((q - h) > 1 ? ",x" + (q - h) : ""));
-    }
+  var miss = missingLines();
   var txt = miss.length ? miss.join("\n") : "（全部都掃到了）";
   try{
     navigator.clipboard.writeText(txt);
@@ -890,6 +900,26 @@ function copyMissing(){
   }catch(e){
     window.prompt("複製這段：", txt);
   }
+}
+
+/* 直接把未掃名單送去貼紙頁（同一個網域，用 localStorage 交接）。
+   不走剪貼簿是因為使用者中途複製別的東西就會把它蓋掉，貼上去變成別的內容。
+   線上版檔名是 sticker.html，本機版是 姓名貼紙.html —— 看網址自己判斷，不用改兩份。 */
+function printMissing(){
+  var miss = missingLines();
+  if(!miss.length){
+    board("idle", "全部都掃到了 🎉", "", "沒有要補印的");
+    return;
+  }
+  try{
+    localStorage.setItem("wenChuhuoPrintList", miss.join("\n"));
+  }catch(e){
+    board("bad", "這個瀏覽器不能保存資料", "", "請改按「⧉ 複製未掃名單」，自己貼過去");
+    return;
+  }
+  var here = String(location.pathname || "");
+  location.href = (here.indexOf("sticker.html") >= 0 || here.indexOf("check.html") >= 0)
+    ? "sticker.html" : "姓名貼紙.html";
 }
 function resetAll(){
   if(!window.confirm("確定要把掃描紀錄全部清掉、重新開始嗎？")) return;
