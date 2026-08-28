@@ -133,10 +133,13 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
   padding:10px 12px;transition:.15s}
 .p .pn{font-size:23px;font-weight:800;line-height:1.15;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-/* 分類要跟著姓名一起縮（em，不能寫死 px）——寫死的話縮了姓名分類還是那麼大，
-   自動縮字級的算式會一直算不準、縮到最小還是塞不下 */
-.p .pn .tg{font-size:.6em;font-weight:800;color:#7a4a00;background:#ffe08a;
-  padding:1px 7px;border-radius:5px;margin-left:7px;vertical-align:2px}
+/* 備註自己一行（使用者要求）——姓名就能吃滿整格寬度，兩邊都不用互相讓。
+   字級寫在 .ptg 上、徽章用 1em，這樣 fitCards() 縮 .ptg 徽章才會跟著縮；
+   寫死 px 的話怎麼縮都塞不下。 */
+.p .ptg{margin-top:3px;font-size:14px;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p .ptg .tg{display:inline-block;font-size:1em;font-weight:800;color:#7a4a00;
+  background:#ffe08a;padding:1px 7px;border-radius:5px}
 .p .pc{font-size:15px;font-weight:700;color:#999;letter-spacing:2px;margin-top:3px;
   display:flex;align-items:center;gap:7px}
 /* 一個人 2 組以上時，編號旁邊顯示「已掃幾組 / 共幾組」 */
@@ -583,8 +586,8 @@ function cardHtml(p, flashCode, extraCls){
          (extraCls ? " " + extraCls : "") +
          (flashCode && p.code === flashCode ? " flash" : "") +
          '" title="' + esc(p.time || "還沒掃") + '">' +
-         '<div class="pn">' + esc(p.name) +
-           (p.tag ? '<span class="tg">' + esc(p.tag) + "</span>" : "") + "</div>" +
+         '<div class="pn">' + esc(p.name) + "</div>" +
+         (p.tag ? '<div class="ptg"><span class="tg">' + esc(p.tag) + "</span></div>" : "") +
          '<div class="pc">' + esc(p.code) +
            ((p.qty || 1) > 1 ? '<span class="qn">' + (p.hits || 0) + " / " + p.qty + "</span>" : "") +
            '<span class="tick">✅</span></div>' +
@@ -611,7 +614,8 @@ function fitOneLine(nodes, min){
 function fitCards(){
   var g = $("grid");
   if(!g) return;
-  fitOneLine(g.querySelectorAll(".pn"), 12);   /* 姓名＋分類 */
+  fitOneLine(g.querySelectorAll(".pn"),  13);     /* 姓名 */
+  fitOneLine(g.querySelectorAll(".ptg"), 11);     /* 備註（自己一行）*/
   fitOneLine(g.querySelectorAll(".pb"), 10.5);   /* i郵箱 → XXX那箱 */
 }
 window.addEventListener("resize", function(){ fitCards(); });
