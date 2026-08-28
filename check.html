@@ -145,7 +145,7 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
 .p.done .qn{background:#00913A}
 .p .pb{margin-top:6px;font-size:13px;line-height:1.4;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p .pb .ch{font-size:.92em;padding:1px 8px}
+.p .pb .ch{font-size:.85em;padding:1px 6px}
 .p .pb .box{margin-left:6px;font-weight:700;color:#444}
 .p .pb .solo{margin-left:6px;color:#aaa}
 /* 打勾本來絕對定位壓在名字右上角，等於偷走名字 30px 寬度。
@@ -604,7 +604,7 @@ function fitOneLine(nodes, min){
   }
   for(i = 0; i < m.length; i++){
     if(m[i][1] <= m[i][2] + 1) continue;
-    var s = m[i][3] * m[i][2] / m[i][1] - 0.5;   /* 留一點餘裕，免得剛好卡在邊上 */
+    var s = m[i][3] * m[i][2] / m[i][1] - 0.8;   /* 留一點餘裕，免得剛好卡在邊上 */
     m[i][0].style.fontSize = Math.max(min, s).toFixed(1) + "px";
   }
 }
@@ -612,7 +612,7 @@ function fitCards(){
   var g = $("grid");
   if(!g) return;
   fitOneLine(g.querySelectorAll(".pn"), 12);   /* 姓名＋分類 */
-  fitOneLine(g.querySelectorAll(".pb"), 11);   /* i郵箱 → XXX那箱 */
+  fitOneLine(g.querySelectorAll(".pb"), 10.5);   /* i郵箱 → XXX那箱 */
 }
 window.addEventListener("resize", function(){ fitCards(); });
 
