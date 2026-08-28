@@ -178,6 +178,39 @@ a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以�
   90deg,#111 0 2px,#fff 2px 4px,#111 4px 5px,#fff 5px 8px,#111 8px 11px,#fff 11px 13px)}
 .labst .cd{font-size:15px;font-weight:700;color:#888;letter-spacing:2px;margin-top:4px}
 .labnote{font-size:16px;line-height:2;color:#666;max-width:430px}
+/* 兩個區塊分開：📥讀進去的（試算表）／📤取出來的（貼紙成品）。
+   使用者要一眼看出「讀什麼」和「印出來長怎樣」是兩件事。 */
+.labsec{background:#fff;border:1px solid #ecd9ae;border-radius:12px;padding:16px 18px;margin-bottom:0}
+.labsec.read{border-left:6px solid #7b3fd4}
+.labsec.take{border-left:6px solid #00913A}
+.labh{margin:0 0 10px;font-size:19px;color:#333}
+.labh span{font-size:15px;font-weight:600;color:#8a7a5c;margin-left:6px}
+.labarrow{text-align:center;font-size:16px;font-weight:800;color:#b39763;margin:12px 0}
+/* 貼紙舞台：中間那張是「真的尺寸 × 放大倍率」，三個把手在外面（不跟著縮放，才好抓） */
+.labstagewrap{position:relative;margin:6px 0 10px}
+.lstage{transform-origin:top left;position:absolute;left:0;top:0}
+.lcell{box-sizing:border-box;background:#fff;border:1px solid #bbb;
+  display:flex;flex-direction:column;justify-content:center;gap:1mm;
+  padding:1.2mm 6mm;overflow:hidden;font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif}
+.lcell .ltop{display:flex;align-items:center;justify-content:flex-start;
+  width:100%;gap:2.5mm;flex:0 0 auto}
+.lcell .lnm{font-weight:900;color:#000;line-height:1.05;white-space:nowrap}
+.lcell .lside{display:flex;flex-direction:column;gap:.6mm;align-items:flex-start}
+.lcell .lch{font-size:3.5mm;font-weight:900;color:#fff;padding:.2mm 1.6mm;border-radius:.8mm}
+.lcell .lch.post{background:#00913A} .lcell .lch.seven{background:#F07000}
+.lcell .lch.fami{background:#0F6FE0} .lcell .lch.self{background:#999}
+.lcell .lrem{font-size:5mm;font-weight:800;color:#222;white-space:nowrap}
+.lcell .lbc{width:100%;background:repeating-linear-gradient(90deg,
+  #111 0 .5mm,#fff .5mm 1mm,#111 1mm 1.3mm,#fff 1.3mm 2mm,#111 2mm 2.8mm,#fff 2.8mm 3.3mm)}
+.lhand{position:absolute;background:#7b3fd4;color:#fff;font-size:12px;font-weight:800;
+  border-radius:6px;padding:3px 8px;cursor:grab;user-select:none;white-space:nowrap;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:3}
+.lhand:active{cursor:grabbing;filter:brightness(1.15)}
+.lhand.corner{background:#c26a00;cursor:nwse-resize}
+.lhand.bar{background:#111}
+.labdims{font-size:17px;font-weight:800;color:#c26a00;margin:8px 0 12px}
+.labdims .d{display:inline-block;margin-right:16px}
+.labdims .d b{color:#333}
 .labnote b{color:#c26a00}
 .srcnow{font-size:19px;font-weight:800;color:#111;line-height:1.7;
   background:#fff;border:1px solid #ecd7a8;border-radius:10px;padding:12px 16px}
@@ -324,21 +357,43 @@ ul.cols li{margin-bottom:5px}
     </details>
 
     <details class="srchelp lab">
-      <summary>🧪 自己試試看：欄位要怎麼取名，系統才看得懂　<span class="dim">（點一下打開）</span></summary>
+      <summary>🧪 自己試試看：表格怎麼設計、貼紙印出來長怎樣　<span class="dim">（點一下打開）</span></summary>
       <div class="srchelpin">
-        <p class="labtip">
-          把下面的<b>標題</b>改成你打算用的字，<b>下面會馬上告訴你系統認不認得</b>。<br>
-          欄位可以<b>加、刪、左右搬</b> —— 搬給你看就知道：<b>順序真的不重要</b>，它只看標題文字。
-        </p>
-        <div class="labbtns">
-          <button type="button" class="tbtn" onclick="labPreset('min')">最少可以這樣（3 欄）</button>
-          <button type="button" class="tbtn" onclick="labPreset('full')">建議這樣（6 欄）</button>
-          <button type="button" class="tbtn" onclick="labPreset('real')">這次靈芝蟲草的樣子</button>
-          <span class="sp"></span>
-          <button type="button" class="tbtn primary" onclick="labAdd()">＋ 加一欄</button>
+
+        <div class="labsec read">
+          <h4 class="labh">📥 讀進去的　<span>你的試算表要長怎樣</span></h4>
+          <p class="labtip">
+            把下面的<b>標題</b>改成你打算用的字，<b>底下會馬上告訴你系統認不認得</b>。<br>
+            欄位可以<b>加、刪、左右搬</b> —— 搬一次就知道：<b>順序真的不重要</b>，它只看標題文字。
+          </p>
+          <div class="labbtns">
+            <button type="button" class="tbtn" onclick="labPreset('min')">最少可以這樣（3 欄）</button>
+            <button type="button" class="tbtn" onclick="labPreset('full')">建議這樣（6 欄）</button>
+            <button type="button" class="tbtn" onclick="labPreset('real')">這次靈芝蟲草的樣子</button>
+            <span class="sp"></span>
+            <button type="button" class="tbtn primary" onclick="labAdd()">＋ 加一欄</button>
+          </div>
+          <div class="labwrap"><table class="labtb" id="labTb"></table></div>
+          <div class="labout" id="labOut"></div>
         </div>
-        <div class="labwrap"><table class="labtb" id="labTb"></table></div>
-        <div class="labout" id="labOut"></div>
+
+        <div class="labarrow">⬇　這張表印出來，就是下面這個樣子</div>
+
+        <div class="labsec take">
+          <h4 class="labh">📤 取出來的　<span>貼紙成品 · 可以直接用拖的調大小</span></h4>
+          <p class="labtip">
+            拖<b>右下角</b>改格子大小、拖<b>姓名下面的把手</b>改字級、拖<b>條碼下緣</b>改高度。<br>
+            調好按「套用到貼紙頁」，① 姓名貼紙產生器就會照這個尺寸印。
+          </p>
+          <div class="labstagewrap" id="dragWrap"></div>
+          <div class="labdims" id="dragDims"></div>
+          <div class="labbtns">
+            <button type="button" class="tbtn primary" onclick="dragApply()">✓ 套用到貼紙頁</button>
+            <button type="button" class="tbtn" onclick="dragReset()">↺ 回到預設（70×37）</button>
+            <span class="srcmsg" id="dragMsg"></span>
+          </div>
+        </div>
+
       </div>
     </details>
   </details>
@@ -852,6 +907,7 @@ function labRender(){
   w.push("第一列一定要是<b>標題</b>，資料從第二列開始。名單中間<b>不要空兩列以上</b>，會被當成到此為止。");
   o += '<h4>提醒</h4><div class="warn">· ' + w.join("<br>· ") + '</div>';
   document.getElementById("labOut").innerHTML = o;
+  if(typeof dragRender === "function") dragRender();   /* 上面的表改了，下面的貼紙也要跟著變 */
 }
 function labSetH(i, v){ LAB[i].h = v; labRender(); }
 function labSetD(i, r, v){ LAB[i].d[r] = v; labRender(); }
@@ -866,6 +922,125 @@ function labMove(i, d){
 function labPreset(k){
   LAB = LAB_PRESETS[k].map(function(c){ return { h:c.h, d:c.d.slice() }; });
   labRender();
+}
+
+/* ===== 📤 取出來的：貼紙成品，可以用拖的調大小 =====
+   這張預覽是照 .cell.chlay（通路版面）的比例畫的，不是真的 render()，
+   所以改貼紙頁版面時記得回來對一下，不然這裡會騙人。
+   真正列印還是貼紙頁在算，這裡調完要按「套用到貼紙頁」才會生效。 */
+var LAY_KEY = "wenChuhuoCellSize";
+var LAY_DEF = { cw:70, ch:37, nmm:15, barmm:8 };
+var LAY = { cw:70, ch:37, nmm:15, barmm:8 };
+var LAY_SCALE = 1.5;                       /* 螢幕上放大幾倍，好拖 */
+var MMPX = (function(){                    /* 這台機器 1mm 等於幾 px */
+  var d = document.createElement("div");
+  d.style.cssText = "position:absolute;visibility:hidden;width:100mm";
+  document.body.appendChild(d);
+  var v = d.getBoundingClientRect().width / 100;
+  if(d.parentNode) d.parentNode.removeChild(d);
+  return v || 3.7795;
+})();
+try {
+  var _s = JSON.parse(localStorage.getItem(LAY_KEY) || "null");
+  if(_s && _s.cw) LAY = { cw:_s.cw, ch:_s.ch, nmm:_s.nmm, barmm:_s.barmm };
+} catch(e){}
+
+function laySave(){ try { localStorage.setItem(LAY_KEY, JSON.stringify(LAY)); } catch(e){} }
+function layClamp(){
+  LAY.cw    = Math.min(200, Math.max(25, LAY.cw));
+  LAY.ch    = Math.min(150, Math.max(14, LAY.ch));
+  LAY.nmm   = Math.min(30,  Math.max(4,  LAY.nmm));
+  LAY.barmm = Math.min(20,  Math.max(4,  LAY.barmm));
+}
+
+function dragRender(){
+  var wrap = document.getElementById("dragWrap");
+  if(!wrap) return;
+  layClamp();
+  var m = labMatch();
+  function cell(k){ var c = m.taken[k]; return c ? String(LAB[c-1].d[0] || "").trim() : ""; }
+  var nm = cell("name") || (LAB.length ? String(LAB[0].d[0] || "").trim() : "王小明");
+  var tg = cell("tag"), ch = cell("ch"), cd = cell("code") || "S001";
+  var chc = !ch ? "self" : (ch.indexOf("郵") >= 0 ? "post"
+          : (/7|eleven/i.test(ch) ? "seven" : (/全家|family/i.test(ch) ? "fami" : "self")));
+  var chl = !ch ? "自取" : (chc === "post" ? "i" : chc === "seven" ? "7" : chc === "fami" ? "全" : ch);
+
+  var k = MMPX * LAY_SCALE;                       /* 1mm 在畫面上的實際 px（含放大）*/
+  var W = LAY.cw * k, H = LAY.ch * k;
+  wrap.style.height = (H + 34) + "px";
+  wrap.innerHTML =
+    '<div class="lstage" style="transform:scale(' + LAY_SCALE + ')">' +
+      '<div class="lcell" style="width:' + LAY.cw + 'mm;height:' + LAY.ch + 'mm">' +
+        '<div class="ltop">' +
+          '<div class="lnm" style="font-size:' + LAY.nmm + 'mm">' + escHtml(nm || "王小明") + '</div>' +
+          '<div class="lside">' +
+            '<div class="lch ' + chc + '">' + escHtml(chl) + '</div>' +
+            (tg ? '<div class="lrem">' + escHtml(tg) + '</div>' : "") +
+          '</div>' +
+        '</div>' +
+        '<div class="lbc" style="height:' + LAY.barmm + 'mm"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="lhand nm"     data-k="nmm"   style="left:6px;top:' + (H * 0.30) + 'px">↕ 姓名</div>' +
+    '<div class="lhand bar"    data-k="barmm" style="left:6px;top:' + (H - 26) + 'px">↕ 條碼</div>' +
+    '<div class="lhand corner" data-k="size"  style="left:' + (W - 6) + 'px;top:' + (H - 6) + 'px">⤡ 大小</div>';
+
+  var hs = wrap.querySelectorAll(".lhand"), i;
+  for(i = 0; i < hs.length; i++) dragBind(hs[i]);
+
+  var dm = document.getElementById("dragDims");
+  if(dm) dm.innerHTML =
+    '<span class="d">格子 <b>' + LAY.cw.toFixed(1) + " × " + LAY.ch.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">姓名 <b>' + LAY.nmm.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">條碼高 <b>' + LAY.barmm.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">A4 一頁約 <b>' + layPerPage() + '</b> 張</span>';
+}
+
+/* A4 210×297，邊界抓 0 —— 只是給個概念，真正的排版還是貼紙頁在算 */
+function layPerPage(){
+  var c = Math.floor(210 / LAY.cw), r = Math.floor(297 / LAY.ch);
+  return Math.max(0, c) * Math.max(0, r);
+}
+
+function dragBind(el){
+  el.addEventListener("pointerdown", function(ev){
+    ev.preventDefault();
+    el.setPointerCapture(ev.pointerId);
+    var k = MMPX * LAY_SCALE;
+    var x0 = ev.clientX, y0 = ev.clientY;
+    var s0 = { cw:LAY.cw, ch:LAY.ch, nmm:LAY.nmm, barmm:LAY.barmm };
+    var what = el.getAttribute("data-k");
+    function move(e){
+      var dx = (e.clientX - x0) / k, dy = (e.clientY - y0) / k;   /* 位移換算成 mm */
+      if(what === "size"){ LAY.cw = s0.cw + dx; LAY.ch = s0.ch + dy; }
+      else if(what === "nmm")   LAY.nmm   = s0.nmm   + dy;        /* 往下拖＝變大 */
+      else if(what === "barmm") LAY.barmm = s0.barmm + dy;
+      dragRender();
+    }
+    function up(){
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      laySave();
+      dragMsg("尺寸記起來了，要真的生效請按「✓ 套用到貼紙頁」", "#c26a00");
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  });
+}
+function dragMsg(t, c){
+  var e = document.getElementById("dragMsg");
+  if(e){ e.textContent = t || ""; e.style.color = c || "#777"; }
+}
+function dragReset(){
+  LAY = { cw:LAY_DEF.cw, ch:LAY_DEF.ch, nmm:LAY_DEF.nmm, barmm:LAY_DEF.barmm };
+  laySave(); dragRender();
+  dragMsg("已回到預設 70 × 37 mm", "#00913A");
+}
+/* 交給貼紙頁：同網域用 localStorage，貼紙頁開頁時會讀 wenChuhuoCellSize 套進規格欄 */
+function dragApply(){
+  layClamp(); laySave();
+  try { localStorage.setItem(LAY_KEY + "_apply", "1"); } catch(e){}
+  dragMsg("✅ 已套用，下次打開「① 姓名貼紙產生器」就是這個尺寸", "#00913A");
 }
 labRender();
 loadSource();

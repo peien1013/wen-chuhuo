@@ -1248,6 +1248,24 @@ window.addEventListener("DOMContentLoaded", function(){
   for(var i=0; i<ids.length; i++)
     $(ids[i]).addEventListener("change", render);
   $("nmm").value = suggestNameSize();      /* 一開啟就用最大可用字級 */
+  /* 入口頁「📤 取出來的」按了「套用到貼紙頁」→ 把調好的尺寸填進規格欄。
+     一次性（讀完就把旗標清掉），否則之後在這頁手動改的尺寸每次開頁都會被蓋回去。 */
+  try {
+    if(localStorage.getItem("wenChuhuoCellSize_apply")){
+      localStorage.removeItem("wenChuhuoCellSize_apply");
+      var sz = JSON.parse(localStorage.getItem("wenChuhuoCellSize") || "null");
+      if(sz && sz.cw){
+        $("cw").value    = sz.cw;
+        $("ch").value    = sz.ch;
+        $("nmm").value   = sz.nmm;
+        $("barmm").value = sz.barmm;
+        $("cols").value  = Math.max(1, Math.floor(210 / sz.cw));
+        $("rows").value  = Math.max(1, Math.floor(297 / sz.ch));
+        msg("已套用入口頁調好的尺寸：" + sz.cw + " × " + sz.ch + " mm", "#00913A");
+      }
+    }
+  } catch(e){}
+
   render();
 
   /* 去試算表撈最新名單（撈不到就維持內建的，不影響使用） */
