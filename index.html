@@ -187,8 +187,8 @@ a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以�
 .labh span{font-size:15px;font-weight:600;color:#8a7a5c;margin-left:6px}
 .labarrow{text-align:center;font-size:16px;font-weight:800;color:#b39763;margin:12px 0}
 /* 貼紙舞台：中間那張是「真的尺寸 × 放大倍率」，三個把手在外面（不跟著縮放，才好抓） */
-.labstagewrap{position:relative;margin:6px 0 10px}
-.lstage{transform-origin:top left;position:absolute;left:0;top:0}
+.labstagewrap{position:relative;margin:6px 0 10px;padding-left:78px}   /* 左邊留一條放把手，不要壓在貼紙上 */
+.lstage{transform-origin:top left;position:absolute;left:78px;top:0}
 .lcell{box-sizing:border-box;background:#fff;border:1px solid #bbb;
   display:flex;flex-direction:column;justify-content:center;gap:1mm;
   padding:1.2mm 6mm;overflow:hidden;font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif}
@@ -967,7 +967,7 @@ function dragRender(){
 
   var k = MMPX * LAY_SCALE;                       /* 1mm 在畫面上的實際 px（含放大）*/
   var W = LAY.cw * k, H = LAY.ch * k;
-  wrap.style.height = (H + 34) + "px";
+  wrap.style.height = (H + 40) + "px";
   wrap.innerHTML =
     '<div class="lstage" style="transform:scale(' + LAY_SCALE + ')">' +
       '<div class="lcell" style="width:' + LAY.cw + 'mm;height:' + LAY.ch + 'mm">' +
@@ -981,9 +981,9 @@ function dragRender(){
         '<div class="lbc" style="height:' + LAY.barmm + 'mm"></div>' +
       '</div>' +
     '</div>' +
-    '<div class="lhand nm"     data-k="nmm"   style="left:6px;top:' + (H * 0.30) + 'px">↕ 姓名</div>' +
-    '<div class="lhand bar"    data-k="barmm" style="left:6px;top:' + (H - 26) + 'px">↕ 條碼</div>' +
-    '<div class="lhand corner" data-k="size"  style="left:' + (W - 6) + 'px;top:' + (H - 6) + 'px">⤡ 大小</div>';
+    '<div class="lhand nm"     data-k="nmm"   style="left:0;top:' + Math.max(0, H * 0.28) + 'px">↕ 姓名</div>' +
+    '<div class="lhand bar"    data-k="barmm" style="left:0;top:' + Math.max(26, H - 30) + 'px">↕ 條碼</div>' +
+    '<div class="lhand corner" data-k="size"  style="left:' + (78 + W - 10) + 'px;top:' + (H - 10) + 'px">⤡ 大小</div>';
 
   var hs = wrap.querySelectorAll(".lhand"), i;
   for(i = 0; i < hs.length; i++) dragBind(hs[i]);
