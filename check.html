@@ -115,10 +115,13 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
    要拉到最下面才看得完。改成整排通吃、一列 9 個。 */
 .gcol.wide{grid-column:1 / -1}
 .gcol.wide .grid{grid-template-columns:repeat(9,minmax(0,1fr))}
-/* 使用者只用桌機看，所以固定 9 個一列，不做手機/窄視窗降級。
-   視窗窄的時候改成把名字微縮（1600px 以上維持原本 23px，不會變小）。 */
-.gcol.wide .p .pn{font-size:clamp(16px,1.45vw,23px)}
-.gcol.wide .p .pn .tg{font-size:clamp(11px,0.88vw,14px)}
+/* 一列 9 個，格子只有 130~190px。三件事讓「整句話待在同一行」：
+   ① 打勾移到右下角（本來壓在名字上，等於偷走右邊 30px）
+   ② 分類跟著姓名一起縮（em，不要固定 px），不然縮了姓名分類還是那麼大
+   ③ 真的塞不下的由 fitWideNames() 逐格把字級縮到剛好，不截字 */
+.gcol.wide .p{padding:9px 10px}
+.gcol.wide .p .pn{font-size:23px}
+.gcol.wide .p .pn .tg{font-size:.6em;margin-left:5px;padding:1px 5px;vertical-align:1px}
 /* 通路分組標題 */
 .ghead{display:flex;align-items:center;gap:13px;margin:22px 0 10px;
   padding-bottom:8px;border-bottom:2px solid #e2e4e8}
@@ -133,16 +136,20 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
   overflow:hidden;text-overflow:ellipsis}
 .p .pn .tg{font-size:14px;font-weight:800;color:#7a4a00;background:#ffe08a;
   padding:1px 7px;border-radius:5px;margin-left:7px;vertical-align:2px}
-.p .pc{font-size:15px;font-weight:700;color:#999;letter-spacing:2px;margin-top:3px}
+.p .pc{font-size:15px;font-weight:700;color:#999;letter-spacing:2px;margin-top:3px;
+  display:flex;align-items:center;gap:7px}
 /* 一個人 2 組以上時，編號旁邊顯示「已掃幾組 / 共幾組」 */
 .p .qn{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:20px;
   background:#B45309;color:#fff;font-size:14px;font-weight:900;letter-spacing:1px}
 .p.done .qn{background:#00913A}
-.p .pb{margin-top:6px;font-size:13px;line-height:1.4}
-.p .pb .ch{font-size:12px;padding:1px 8px}
+.p .pb{margin-top:6px;font-size:13px;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p .pb .ch{font-size:.92em;padding:1px 8px}
 .p .pb .box{margin-left:6px;font-weight:700;color:#444}
 .p .pb .solo{margin-left:6px;color:#aaa}
-.p .tick{position:absolute;right:9px;top:9px;font-size:21px;opacity:0}
+/* 打勾本來絕對定位壓在名字右上角，等於偷走名字 30px 寬度。
+   改成掛在編號那一行的最右邊 —— 那行只有 S001，空位多得是。 */
+.p .tick{margin-left:auto;font-size:19px;opacity:0;flex:0 0 auto}
 /* 掃到了就上該通路的顏色；沒掃到維持白底，一眼分辨 */
 .p.done .tick{opacity:1}
 .p.done.post{background:#e9f9ee;border-color:#00913A}
@@ -578,10 +585,35 @@ function cardHtml(p, flashCode, extraCls){
          '<div class="pn">' + esc(p.name) +
            (p.tag ? '<span class="tg">' + esc(p.tag) + "</span>" : "") + "</div>" +
          '<div class="pc">' + esc(p.code) +
-           ((p.qty || 1) > 1 ? '<span class="qn">' + (p.hits || 0) + " / " + p.qty + "</span>" : "") + "</div>" +
-         (p.ch ? '<div class="pb">' + boxLine(p) + "</div>" : "") +
-         '<span class="tick">✅</span></div>';
+           ((p.qty || 1) > 1 ? '<span class="qn">' + (p.hits || 0) + " / " + p.qty + "</span>" : "") +
+           '<span class="tick">✅</span></div>' +
+         (p.ch ? '<div class="pb">' + boxLine(p) + "</div>" : "") + "</div>";
 }
+
+
+/* 一行放不下就把那一格的字級縮到剛好 —— 不換行、也不截字。
+   使用者的要求：「整句話都要在同一行」。
+   量測和寫入分兩輪做，不然 200 多格會一格觸發一次重排、開頁會頓一下。 */
+function fitOneLine(nodes, min){
+  var i, e, m = [];
+  for(i = 0; i < nodes.length; i++) nodes[i].style.fontSize = "";
+  for(i = 0; i < nodes.length; i++){
+    e = nodes[i];
+    m.push([e, e.scrollWidth, e.clientWidth, parseFloat(getComputedStyle(e).fontSize)]);
+  }
+  for(i = 0; i < m.length; i++){
+    if(m[i][1] <= m[i][2] + 1) continue;
+    var s = m[i][3] * m[i][2] / m[i][1] - 0.5;   /* 留一點餘裕，免得剛好卡在邊上 */
+    m[i][0].style.fontSize = Math.max(min, s).toFixed(1) + "px";
+  }
+}
+function fitCards(){
+  var g = $("grid");
+  if(!g) return;
+  fitOneLine(g.querySelectorAll(".pn"), 12);   /* 姓名＋分類 */
+  fitOneLine(g.querySelectorAll(".pb"), 10);   /* i郵箱 → 放進「XXX」那箱 */
+}
+window.addEventListener("resize", function(){ fitCards(); });
 
 function renderList(flashCode){
   var groups = {}, order = [], i, c, p;
@@ -632,6 +664,7 @@ function renderList(flashCode){
                      : "這個範圍裡還沒有人掃到") + "</div>";
   $("grid").innerHTML = h;
   updateCount();
+  fitCards();
 }
 function updateCount(){
   var done = doneQty(), all = totalQty(), i;
