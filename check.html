@@ -121,7 +121,6 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
    ③ 真的塞不下的由 fitWideNames() 逐格把字級縮到剛好，不截字 */
 .gcol.wide .p{padding:9px 10px}
 .gcol.wide .p .pn{font-size:23px}
-.gcol.wide .p .pn .tg{font-size:.6em;margin-left:5px;padding:1px 5px;vertical-align:1px}
 /* 通路分組標題 */
 .ghead{display:flex;align-items:center;gap:13px;margin:22px 0 10px;
   padding-bottom:8px;border-bottom:2px solid #e2e4e8}
@@ -134,7 +133,9 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
   padding:10px 12px;transition:.15s}
 .p .pn{font-size:23px;font-weight:800;line-height:1.15;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.p .pn .tg{font-size:14px;font-weight:800;color:#7a4a00;background:#ffe08a;
+/* 分類要跟著姓名一起縮（em，不能寫死 px）——寫死的話縮了姓名分類還是那麼大，
+   自動縮字級的算式會一直算不準、縮到最小還是塞不下 */
+.p .pn .tg{font-size:.6em;font-weight:800;color:#7a4a00;background:#ffe08a;
   padding:1px 7px;border-radius:5px;margin-left:7px;vertical-align:2px}
 .p .pc{font-size:15px;font-weight:700;color:#999;letter-spacing:2px;margin-top:3px;
   display:flex;align-items:center;gap:7px}
@@ -611,7 +612,7 @@ function fitCards(){
   var g = $("grid");
   if(!g) return;
   fitOneLine(g.querySelectorAll(".pn"), 12);   /* 姓名＋分類 */
-  fitOneLine(g.querySelectorAll(".pb"), 10);   /* i郵箱 → 放進「XXX」那箱 */
+  fitOneLine(g.querySelectorAll(".pb"), 11);   /* i郵箱 → XXX那箱 */
 }
 window.addEventListener("resize", function(){ fitCards(); });
 
@@ -700,7 +701,7 @@ function chChip(ch){
 function boxLine(p){
   if(!p || !p.ch) return "";
   return chChip(p.ch) + (p.box && p.box !== p.name
-    ? '<span class="box">→ 放進「' + esc(p.box) + '」那箱</span>'
+    ? '<span class="box">→ ' + esc(p.box) + "那箱</span>"
     : '<span class="solo">自己一箱</span>');
 }
 
