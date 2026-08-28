@@ -72,6 +72,15 @@ h1{font-size:26px;margin:0 0 3px}
 .modes .mode:hover{border-color:#999}
 .modes .mode.on{background:#7b3fd4;border-color:#7b3fd4;color:#fff}
 .modehint{font-size:16px;color:#777;font-weight:700}
+/* 第二排：已掃／未掃。跟通路那排是「兩個條件同時成立」，不是互相取代 */
+.modes.sub2{margin:-6px 0 16px}
+.modes.sub2 .mode{font-size:17px;padding:9px 18px}
+.modes .mlabel{font-size:17px;font-weight:800;color:#555}
+.modes .mn{display:inline-block;min-width:1.5em;margin-left:7px;padding:1px 8px;
+  border-radius:999px;background:#eee;color:#444;font-size:15px;font-weight:800}
+.modes .mode.on .mn{background:rgba(255,255,255,.3);color:#fff}
+.nothing{background:#f3fbf4;border:2px dashed #9ccfa4;border-radius:14px;
+  padding:34px 20px;text-align:center;font-size:21px;font-weight:800;color:#2c7a3d}
 .bar{background:#fff;border:1px solid var(--line);border-radius:12px;
   padding:14px 18px;margin-bottom:14px}
 .barTop{display:flex;justify-content:space-between;align-items:baseline;
@@ -170,6 +179,14 @@ details summary{cursor:pointer;font-size:16px;font-weight:700;padding:5px 0}
     <button id="mShip" class="mode"    onclick="setFilter('ship')">🚚 要郵寄</button>
     <button id="mSelf" class="mode"    onclick="setFilter('self')">🏠 自取</button>
     <span class="modehint" id="modeHint"></span>
+  </div>
+
+  <div class="modes sub2">
+    <span class="mlabel">看：</span>
+    <button id="sAll"  class="mode on" onclick="setShow('all')">全部</button>
+    <button id="sTodo" class="mode"    onclick="setShow('todo')">⬜ 還沒掃到<span class="mn" id="nTodo">0</span></button>
+    <button id="sDone" class="mode"    onclick="setShow('done')">✅ 已經掃到<span class="mn" id="nDone">0</span></button>
+    <span class="modehint" id="showHint"></span>
   </div>
 
   <div class="bar">
@@ -463,6 +480,26 @@ function setFilter(f){
     f === "self" ? "只算自取的 —— 拿來確認貼紙印齊了沒" : "";
   renderList();
 }
+
+/* 第二個篩選軸：已掃／未掃。跟上面的通路篩選是「而且」的關係
+   （例：只看自取 ＋ 只看還沒掃到 → 自取裡面漏掉的那幾個）。
+   注意：這個只影響「畫出哪幾張卡片」，上面的進度條和每一區的 x / y 組
+   一律還是算整區的，不然切到「只看未掃」進度條會變 0% 嚇死人。 */
+var SHOW = "all";                                   /* all | todo | done */
+function isDone(p){ return (p.hits || 0) >= (p.qty || 1); }
+function inShow(p){
+  if(SHOW === "all") return true;
+  return SHOW === "done" ? isDone(p) : !isDone(p);
+}
+function setShow(s){
+  SHOW = s;
+  var ids = { all:"sAll", todo:"sTodo", done:"sDone" }, k;
+  for(k in ids) $(ids[k]).className = "mode" + (k === s ? " on" : "");
+  $("showHint").textContent =
+    s === "todo" ? "只列還沒掃到的 —— 這些就是要補的" :
+    s === "done" ? "只列已經掃完的" : "";
+  renderList();
+}
 function totalQty(){
   var n = 0, i;
   for(i=0;i<ROSTER.length;i++) if(inFilter(ROSTER[i])) n += (ROSTER[i].qty || 1);
@@ -566,15 +603,24 @@ function renderList(flashCode){
       if(list[i].box) boxes[list[i].box] = 1;
     }
     var nBox = Object.keys(boxes).length;
+
+    /* 已掃／未掃篩選只挑要畫的卡片，上面的 done / all 維持整區的數字 */
+    var vis = [];
+    for(i = 0; i < list.length; i++) if(inShow(list[i])) vis.push(list[i]);
+    if(!vis.length && SHOW !== "all") continue;      /* 這一區沒東西可看就整欄收起來 */
+
     h += '<div class="gcol"><div class="ghead">' + headChip(c) +
          '<span class="gcount">' + done + " / " + all + " 組" +
          (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
          (done === all ? '<span class="gdone">✅ 這區掃完了</span>' : "") +
          "</div><div class=\"grid\">";
-    for(i = 0; i < list.length; i++) h += cardHtml(list[i], flashCode);
+    for(i = 0; i < vis.length; i++) h += cardHtml(vis[i], flashCode);
     h += "</div></div>";
   }
+  if(!h) h = '<div class="nothing">' +
+    (SHOW === "todo" ? "🎉 這個範圍裡的人全部都掃到了"
+                     : "這個範圍裡還沒有人掃到") + "</div>";
   $("grid").innerHTML = h;
   updateCount();
 }
@@ -586,6 +632,15 @@ function updateCount(){
   $("cntLeft").textContent = left ? ("還差 " + left + " 個") : "全部掃完了 🎉";
   $("cntLeft").style.color = left ? "#c00" : "#00913A";
   $("fill").style.width = all ? (done*100/all) + "%" : "0";
+
+  /* 第二排按鈕上的人數（照目前的通路篩選算，算人不算組）*/
+  var td = 0, dn = 0;
+  for(i = 0; i < ROSTER.length; i++){
+    if(!inFilter(ROSTER[i])) continue;
+    if(isDone(ROSTER[i])) dn++; else td++;
+  }
+  if($("nTodo")) $("nTodo").textContent = td;
+  if($("nDone")) $("nDone").textContent = dn;
 }
 
 /* 通路徽章：i郵箱綠／7-11 橘／全家藍 */
@@ -891,6 +946,9 @@ window.addEventListener("DOMContentLoaded", function(){
   /* 網址帶 ?only=self / ?only=ship 就直接進那個模式（桌面捷徑用） */
   var qm = (location.search || "").match(/only=(self|ship|all)/);
   if(qm) setFilter(qm[1]);
+  /* ?show=todo / ?show=done 可以直接進「只看沒掃到」（補印那天很好用） */
+  var qs = (location.search || "").match(/show=(todo|done|all)/);
+  if(qs) setShow(qs[1]);
 
   api({ action: "roster" }, function(r){ rosterRes = r; bothBack(); });
   api({ action: "list"   }, function(r){ listRes   = r; bothBack(); });
