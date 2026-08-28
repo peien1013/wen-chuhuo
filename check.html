@@ -757,7 +757,9 @@ function lookup(raw){
   save();
   renderList(p.code);
   /* 背景寫進試算表，不擋掃描 */
+  PENDING++;                       /* 這筆還沒寫進試算表，這段期間關頁面要攔一下 */
   api({ action: "scan", code: p.code }, function(res){
+    PENDING--;
     if(!res.ok){ setSync("⚠ 這筆沒寫進試算表（" + (res.error || "未知") + "）", false); return; }
     if(res.time){ p.time = normTime(res.time); save(); }
     setSync("✅ 已同步試算表（第 " + (res.total || "?") + " 筆）", true);
@@ -868,11 +870,12 @@ function lsAvailable(){
   catch(e){ return false; }
 }
 
-/* 掃到一半離開要攔一下 */
+/* 只有「還有一筆正在寫進試算表」才攔人。
+   本來是「掃到一半就攔」，但每掃一下就立刻寫進試算表了，關掉根本不會掉資料，
+   那個「系統可能不會儲存你所做的變更」只會嚇人。 */
+var PENDING = 0;
 window.addEventListener("beforeunload", function(e){
-  var done = 0, i;
-  done = doneQty();
-  if(done > 0 && done < totalQty()){ e.preventDefault(); e.returnValue = ""; }
+  if(PENDING > 0){ e.preventDefault(); e.returnValue = ""; }
 });
 
 window.addEventListener("DOMContentLoaded", function(){
