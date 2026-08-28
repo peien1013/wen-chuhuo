@@ -25,6 +25,21 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;margin-bottom:14px}
 .panel h2{font-size:17px;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid #eee}
+/* ② ③ 預設收起來（使用者要求）——平常只有「貼上名單」和「產生與列印」露出來，
+   要調規格才點開。用 <details>，不用 JS。 */
+.panel.fold{padding-bottom:16px}
+.panel.fold summary{font-size:17px;font-weight:700;margin:0;padding-bottom:8px;
+  border-bottom:2px solid #eee;cursor:pointer;list-style:none;
+  display:flex;align-items:center;gap:9px;user-select:none}
+.panel.fold summary::-webkit-details-marker{display:none}
+.panel.fold summary::before{content:"▸";color:var(--brand);font-size:14px}
+.panel.fold[open] summary::before{content:"▾"}
+.panel.fold summary:hover{color:var(--brand)}
+.panel.fold summary .fh{font-size:13px;font-weight:600;color:#999;margin-left:auto}
+.panel.fold[open] summary .fh{display:none}
+.panel.fold[open] summary{margin-bottom:12px}
+.panel.fold:not([open]){padding-bottom:8px}
+.panel.fold:not([open]) summary{border-bottom:none;padding-bottom:0}
 .row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
 .f{display:flex;flex-direction:column;gap:5px}
 .f label{font-size:13px;color:#555;font-weight:600}
@@ -137,6 +152,12 @@ button.w{background:#666}
   <div class="panel">
     <h2>① 貼上名單</h2>
     <textarea id="list" placeholder="一行一個人，直接貼上就好：&#10;王小明&#10;陳美玲&#10;林大寶&#10;&#10;想自己指定編號的話，用逗號或 Tab 分隔（第二欄＝編號）：&#10;王小明,S001&#10;陳美玲,S002"></textarea>
+    <div class="row" style="margin-top:11px">
+      <button type="button" class="w" onclick="showMissingOnly()"
+              title="已經印好又掃過的人就不用再出現，只留下還沒掃到的">🔎 只留還沒掃到的</button>
+      <button type="button" class="w" onclick="showAllNames()">↺ 放回完整名單</button>
+      <span id="filtmsg" class="hint" style="margin:0"></span>
+    </div>
     <p class="hint">
       一行一個人，用逗號分開：<b>姓名,備註,編號,通路</b>（後面三個都可以留空）。<br>
       欄位順序不用照著寫，程式自己認：像編號的當編號、<b>i郵箱／7-11／全家</b>當通路、其他短字當備註。<br>
@@ -144,8 +165,8 @@ button.w{background:#666}
     </p>
   </div>
 
-  <div class="panel">
-    <h2>② 編號與內容</h2>
+  <details class="panel fold">
+    <summary>② 編號與內容<span class="fh">（點一下打開）</span></summary>
     <div class="row">
       <div class="f"><label>編號前綴</label><input id="prefix" value="S" maxlength="4"></div>
       <div class="f"><label>起始號碼</label><input id="startNo" type="number" value="1" min="0"></div>
@@ -169,10 +190,10 @@ button.w{background:#666}
       QR 比較省寬度但<b>只有二維槍掃得到</b>。不確定你的槍是哪種，就先用條碼。<br>
       條碼只能用<b>英數和 - 符號</b>，編號別打中文。
     </p>
-  </div>
+  </details>
 
-  <div class="panel">
-    <h2>③ 你的貼紙規格</h2>
+  <details class="panel fold">
+    <summary>③ 你的貼紙規格<span class="fh">（點一下打開）</span></summary>
     <div class="row presets" style="margin-bottom:14px">
       <span style="font-size:13px;color:#555;font-weight:600;align-self:center">快速套用：</span>
       <button type="button" onclick="preset(3,10,70,29.7,0,0,0,0)">鶴屋 C3070（3×10，滿版）</button>
@@ -210,7 +231,7 @@ button.w{background:#666}
     <p class="hint">
       <b>「從第幾格開始印」</b>＝用剩半張紙時，從還沒撕掉的那格接著印，不浪費。左上第一格是 1，往右數。
     </p>
-  </div>
+  </details>
 
   <div class="panel">
     <h2>④ 產生與列印</h2>
@@ -1238,6 +1259,7 @@ window.addEventListener("DOMContentLoaded", function(){
       return;
     }
     buildGroups(res.data);        /* 先算好同組，render 時上色 */
+    ROSTER_ALL = res.data;        /* 留著給「只留還沒掃到的」用，不用再撈一次 */
 
     /* 從核對頁帶名單過來的時候，名單就是那份缺件的，不要被整份 238 人蓋掉。
        但上面的 buildGroups 還是要跑完，同組的淡色底才會對。
@@ -1262,6 +1284,63 @@ window.addEventListener("DOMContentLoaded", function(){
     msg("✅ 已從試算表載入 " + res.count + " 人", "#00913A");
   });
 });
+
+/* ①「只留還沒掃到的」／「放回完整名單」
+   已經印好又掃過的人不用再出現在名單裡（使用者要求）。
+   掃了幾組去問掃描紀錄（action=list），掃滿自己的組數才算完成。 */
+var ROSTER_ALL = null;
+
+function rosterLines(rows){
+  var out = [], i, p;
+  for(i = 0; i < rows.length; i++){
+    p = rows[i];
+    out.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || "") +
+             ((p.qty && p.qty > 1) ? ",x" + p.qty : ""));
+  }
+  return out;
+}
+function filtMsg(t, c){
+  var e = $("filtmsg");
+  if(e){ e.textContent = t || ""; e.style.color = c || "#777"; }
+}
+function showAllNames(){
+  if(!ROSTER_ALL){ filtMsg("名單還沒撈回來，等一下再按", "#c26a00"); return; }
+  $("list").value = rosterLines(ROSTER_ALL).join("\n");
+  render();
+  filtMsg("已放回完整名單 " + ROSTER_ALL.length + " 人", "#00913A");
+}
+function showMissingOnly(){
+  if(!ROSTER_ALL){ filtMsg("名單還沒撈回來，等一下再按", "#c26a00"); return; }
+  filtMsg("正在問掃描紀錄，看誰還沒掃到…", "#0f6fe0");
+  api({ action: "list" }, function(res){
+    if(!res.ok || !res.data){
+      filtMsg("撈不到掃描紀錄（" + (res.error || "") + "）", "#c26a00");
+      return;
+    }
+    var done = {}, i;
+    for(i = 0; i < res.data.length; i++)
+      done[String(res.data[i].code).toUpperCase()] = Number(res.data[i].count) || 1;
+
+    var left = [], sheets = 0, p, q, h, need;
+    for(i = 0; i < ROSTER_ALL.length; i++){
+      p = ROSTER_ALL[i];
+      q = p.qty || 1;
+      h = done[String(p.code || "").toUpperCase()] || 0;
+      if(h >= q) continue;                 /* 掃滿了＝印好也貼好了，不用再出現 */
+      need = q - h;
+      left.push(p.name + "," + (p.tag || "") + "," + (p.code || "") + "," + (p.ch || "") +
+                (need > 1 ? ",x" + need : ""));
+      sheets += need;
+    }
+    if(!left.length){
+      filtMsg("🎉 每個人都掃到了，沒有要補印的", "#00913A");
+      return;
+    }
+    $("list").value = left.join("\n");
+    render();
+    filtMsg("只留還沒掃到的 " + left.length + " 人／" + sheets + " 張", "#00913A");
+  });
+}
 </script>
 </body>
 </html>
