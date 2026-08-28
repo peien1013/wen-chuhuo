@@ -124,6 +124,15 @@ a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以�
 .src{margin-top:34px;background:#fff8e8;border:1px solid #f0d089;
   border-radius:14px;padding:20px 24px 22px}
 .src h3{margin:0 0 12px;font-size:22px;color:#c26a00}
+/* 這一區預設收起來（使用者要求）——平常首頁只留四張卡片，要換名單才點開 */
+.src > summary{margin:0;font-size:22px;font-weight:800;color:#c26a00;cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:10px;user-select:none}
+.src > summary::-webkit-details-marker{display:none}
+.src > summary::before{content:"▸";font-size:17px}
+.src[open] > summary::before{content:"▾"}
+.src > summary .fh{font-size:14px;font-weight:600;color:#b39763;margin-left:auto}
+.src[open] > summary .fh{display:none}
+.src[open] > summary{margin-bottom:12px}
 .srcnow{font-size:19px;font-weight:800;color:#111;line-height:1.7;
   background:#fff;border:1px solid #ecd7a8;border-radius:10px;padding:12px 16px}
 .srcnow .big{font-size:22px;color:#c26a00}
@@ -223,8 +232,8 @@ ul.cols li{margin-bottom:5px}
       </p>
     </div>
   </div>
-  <div class="src">
-    <h3>📋 這批要出貨的名單</h3>
+  <details class="src">
+    <summary>📋 這批要出貨的名單<span class="fh">（點一下打開）</span></summary>
     <div class="srcnow" id="srcNow">讀取中…</div>
 
     <div class="mustedit">
@@ -267,7 +276,7 @@ ul.cols li{margin-bottom:5px}
         <span class="dim">（沒網路時會自動用內建的舊名單，畫面上會標示，不會卡住。）</span>
       </div>
     </details>
-  </div>
+  </details>
 
   <p class="foot" id="foot">
     掃描槍 AURORA XB-G20（二維，條碼 QR 都能掃）· 印表機 Epson L6490（A4／縮放 100%／邊界無）。
