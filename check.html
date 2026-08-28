@@ -903,7 +903,8 @@ window.addEventListener("DOMContentLoaded", function(){
   function bothBack(){
     if(--waiting > 0) return;
 
-    if(rosterRes && rosterRes.ok && rosterRes.data && rosterRes.data.length){
+    var rosterOk = !!(rosterRes && rosterRes.ok && rosterRes.data && rosterRes.data.length);
+    if(rosterOk){
       var arr = [], lines = [], i, p;
       for(i = 0; i < rosterRes.data.length; i++){
         p = rosterRes.data[i];
@@ -937,7 +938,14 @@ window.addEventListener("DOMContentLoaded", function(){
         }
       }
       save();
-      setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人／" + totalQty() + " 組 · 已掃 " + hit + " 組", true);
+      /* 名單沒撈到但本機有舊的 → 畫面上是「上次那份」，編號可能已經過期。
+         這種情況以前會照樣顯示 ✅，害人看著舊編號還以為是最新的。一定要講出來。 */
+      if(rosterOk)
+        setSync("✅ 已連線試算表 · 名單 " + ROSTER.length + " 人／" + totalQty() +
+                " 組 · 已掃 " + hit + " 組", true);
+      else
+        setSync("⚠ 名單沒更新到（" + ((rosterRes && rosterRes.error) || "撈不到") +
+                "）— 現在畫面上是上次存的名單，編號可能是舊的，請重新整理", false);
     } else {
       setSync("⚠ 連不上試算表（" + ((listRes && listRes.error) || "") + "）— 改用本機紀錄", false);
     }
