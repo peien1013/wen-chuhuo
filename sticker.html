@@ -219,6 +219,9 @@ button.w{background:#666}
       <div class="f"><label>QR 大小 mm</label><input id="qrmm" type="number" value="24" step="0.5" min="10"></div>
       <div class="f"><label>條碼高 mm</label><input id="barmm" type="number" value="10" step="0.5" min="4"></div>
       <div class="f"><label>姓名字級 mm</label><input id="nmm" type="number" value="8" step="0.5" min="3"></div>
+      <div class="f"><label>通路框字級 mm</label><input id="chmm" type="number" value="5.5" step="0.1" min="2"></div>
+      <div class="f"><label>備註字級 mm</label><input id="remmm" type="number" value="5" step="0.1" min="2"></div>
+      <div class="f"><label>組數字級 mm</label><input id="qtymm" type="number" value="3.4" step="0.1" min="2"></div>
       <div class="f"><label>裁切線</label>
         <select id="cutline" style="width:210px">
           <option value="line">田字格線（沿線切，推薦）</option>
@@ -781,6 +784,10 @@ function readOpt(){
     qrmm: num("qrmm", 24),
     barmm: num("barmm", 10),
     nmm: num("nmm", 8),
+    /* 通路小框／備註／組數的字級也開放調（入口頁的拖拉版面會寫進這三格）*/
+    chmm: num("chmm", 5.5),
+    remmm: num("remmm", 5),
+    qtymm: num("qtymm", 3.4),
     layout: $("layout").value,
     cutline: $("cutline").value
   };
@@ -951,13 +958,17 @@ function cellEl(it, r, c, opt){
     var ci = chInfo(it.ch);
     /* 「第幾張／共幾張」放在右邊那疊的最上面，跟通路、備註排在一起，
        左邊整塊留給姓名。使用者要的。 */
-    var qbSide = (it.qty > 1) ? '<div class="qbs">' + it.seq + " / " + it.qty + "</div>" : "";
+    var qbSide = (it.qty > 1)
+      ? '<div class="qbs" style="font-size:' + opt.qtymm + 'mm">' + it.seq + " / " + it.qty + "</div>"
+      : "";
     h += '<div class="toprow">' +
            '<div class="nmline" style="font-size:' + opt.nmm + 'mm">' +
              '<span class="nm">' + esc(it.name) + "</span></div>" +
            '<div class="side">' + qbSide +
-             (ci ? '<div class="chl ' + ci.cls + '">' + esc(ci.name) + "</div>" : "") +
-             (it.tag ? '<div class="rem">' + esc(it.tag) + "</div>" : "") +
+             (ci ? '<div class="chl ' + ci.cls + '" style="font-size:' + opt.chmm + 'mm">' +
+                     esc(ci.name) + "</div>" : "") +
+             (it.tag ? '<div class="rem" style="font-size:' + opt.remmm + 'mm">' +
+                     esc(it.tag) + "</div>" : "") +
            "</div>" +
          "</div>";
     /* 條碼也跟著往內縮，跟上面的 4mm 邊界對齊 */
@@ -1026,10 +1037,11 @@ function fitVert(){
 
 /* 備註太長就縮字級。大部分會被 normTag 歸成「日本」「疫情」，
    但偶爾有沒歸到的長句（例「需要加持能量提升免疫力」），縮到塞得下為止 */
-function fitRem(){
+function fitRem(opt){
   var els = document.querySelectorAll(".cell.chlay .rem"), i, el, size, guard;
+  var base = (opt && opt.remmm) ? opt.remmm : 5;   /* 起點改成規格欄設的字級，不要寫死 5 */
   for(i=0; i<els.length; i++){
-    el = els[i]; size = 5; guard = 0;
+    el = els[i]; size = base; guard = 0;
     el.style.fontSize = size + "mm";
     while(el.scrollWidth > el.clientWidth + 1 && size > 2.4 && guard < 40){
       size -= 0.25;
@@ -1119,7 +1131,7 @@ function render(){
     out.appendChild(sheet);
   }
   fitNames(opt);
-  fitRem();
+  fitRem(opt);
   fitVert();
 
   var over = opt.ml + opt.cols*opt.cw + (opt.cols-1)*opt.gx;
@@ -1244,6 +1256,7 @@ window.addEventListener("DOMContentLoaded", function(){
   }
   $("layout").addEventListener("change", onLayoutChange);
   var ids = ["cols","rows","cw","ch","ml","mt","gx","gy","qrmm","barmm","nmm","skip",
+             "chmm","remmm","qtymm",
              "copies","prefix","startNo","pad","cutline"];
   for(var i=0; i<ids.length; i++)
     $(ids[i]).addEventListener("change", render);
@@ -1259,6 +1272,9 @@ window.addEventListener("DOMContentLoaded", function(){
         $("ch").value    = sz.ch;
         $("nmm").value   = sz.nmm;
         $("barmm").value = sz.barmm;
+        if(sz.chmm)  $("chmm").value  = sz.chmm;
+        if(sz.remmm) $("remmm").value = sz.remmm;
+        if(sz.qtymm) $("qtymm").value = sz.qtymm;
         $("cols").value  = Math.max(1, Math.floor(210 / sz.cw));
         $("rows").value  = Math.max(1, Math.floor(297 / sz.ch));
         msg("已套用入口頁調好的尺寸：" + sz.cw + " × " + sz.ch + " mm", "#00913A");

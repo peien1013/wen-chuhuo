@@ -211,6 +211,20 @@ a.card h2{white-space:nowrap}   /* ⓘ 在標題上方，不會重疊，所以�
 .labdims{font-size:17px;font-weight:800;color:#c26a00;margin:8px 0 12px}
 .labdims .d{display:inline-block;margin-right:16px}
 .labdims .d b{color:#333}
+.lcell .lqb{font-size:3.4mm;font-weight:900;color:#B45309;line-height:1.2;white-space:nowrap}
+.lhand.qb{background:#B45309} .lhand.ch{background:#00913A} .lhand.rem{background:#555}
+/* 🖨 整頁預覽：把 A4 縮小畫出來，一眼看到一頁排得下幾張、邊邊會不會被切掉 */
+.pagebox{margin:4px 0 14px}
+.pagehd{font-size:17px;font-weight:800;color:#333;margin-bottom:8px}
+.pagehd span{font-size:14px;font-weight:600;color:#8a7a5c;margin-left:6px}
+.pagewrap{position:relative;background:#fff;border:1px solid #bbb;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.pcell{position:absolute;box-sizing:border-box;border:1px dashed #c8c8c8;background:#fff;
+  display:flex;flex-direction:column;justify-content:center;gap:1px;padding:2px 4px;overflow:hidden}
+.pcell .pn{font-weight:900;color:#111;line-height:1;white-space:nowrap;overflow:hidden}
+.pcell .pb2{background:#111;width:100%}
+.pcell .pc2{width:8px;border-radius:2px}
+.pcell .prow{display:flex;align-items:center;gap:3px}
+.pageover{font-size:15px;font-weight:800;color:#c00;margin-top:8px}
 .labnote b{color:#c26a00}
 .srcnow{font-size:19px;font-weight:800;color:#111;line-height:1.7;
   background:#fff;border:1px solid #ecd7a8;border-radius:10px;padding:12px 16px}
@@ -387,6 +401,10 @@ ul.cols li{margin-bottom:5px}
           </p>
           <div class="labstagewrap" id="dragWrap"></div>
           <div class="labdims" id="dragDims"></div>
+          <div class="pagebox">
+            <div class="pagehd">🖨 整頁預覽　<span>A4 一張印出來會是這樣</span></div>
+            <div class="pagewrap" id="pageWrap"></div>
+          </div>
           <div class="labbtns">
             <button type="button" class="tbtn primary" onclick="dragApply()">✓ 套用到貼紙頁</button>
             <button type="button" class="tbtn" onclick="dragReset()">↺ 回到預設（70×37）</button>
@@ -929,8 +947,8 @@ function labPreset(k){
    所以改貼紙頁版面時記得回來對一下，不然這裡會騙人。
    真正列印還是貼紙頁在算，這裡調完要按「套用到貼紙頁」才會生效。 */
 var LAY_KEY = "wenChuhuoCellSize";
-var LAY_DEF = { cw:70, ch:37, nmm:15, barmm:8 };
-var LAY = { cw:70, ch:37, nmm:15, barmm:8 };
+var LAY_DEF = { cw:70, ch:37, nmm:15, barmm:8, chmm:5.5, remmm:5, qtymm:3.4 };
+var LAY = { cw:70, ch:37, nmm:15, barmm:8, chmm:5.5, remmm:5, qtymm:3.4 };
 var LAY_SCALE = 1.5;                       /* 螢幕上放大幾倍，好拖 */
 var MMPX = (function(){                    /* 這台機器 1mm 等於幾 px */
   var d = document.createElement("div");
@@ -942,7 +960,8 @@ var MMPX = (function(){                    /* 這台機器 1mm 等於幾 px */
 })();
 try {
   var _s = JSON.parse(localStorage.getItem(LAY_KEY) || "null");
-  if(_s && _s.cw) LAY = { cw:_s.cw, ch:_s.ch, nmm:_s.nmm, barmm:_s.barmm };
+  if(_s && _s.cw) LAY = { cw:_s.cw, ch:_s.ch, nmm:_s.nmm, barmm:_s.barmm,
+                          chmm:_s.chmm || 5.5, remmm:_s.remmm || 5, qtymm:_s.qtymm || 3.4 };
 } catch(e){}
 
 function laySave(){ try { localStorage.setItem(LAY_KEY, JSON.stringify(LAY)); } catch(e){} }
@@ -953,6 +972,9 @@ function layClamp(){
   LAY.ch    = r1(Math.min(150, Math.max(14, LAY.ch)));
   LAY.nmm   = r1(Math.min(30,  Math.max(4,  LAY.nmm)));
   LAY.barmm = r1(Math.min(20,  Math.max(4,  LAY.barmm)));
+  LAY.chmm  = r1(Math.min(12,  Math.max(2,  LAY.chmm)));
+  LAY.remmm = r1(Math.min(12,  Math.max(2,  LAY.remmm)));
+  LAY.qtymm = r1(Math.min(10,  Math.max(2,  LAY.qtymm)));
 }
 
 function dragRender(){
@@ -969,6 +991,7 @@ function dragRender(){
 
   var k = MMPX * LAY_SCALE;                       /* 1mm 在畫面上的實際 px（含放大）*/
   var W = LAY.cw * k, H = LAY.ch * k;
+  var qty = 8;                                     /* 預覽固定拿「3 / 8」示範組數的字級 */
   wrap.style.height = (H + 40) + "px";
   wrap.innerHTML =
     '<div class="lstage" style="transform:scale(' + LAY_SCALE + ')">' +
@@ -976,15 +999,20 @@ function dragRender(){
         '<div class="ltop">' +
           '<div class="lnm" style="font-size:' + LAY.nmm + 'mm">' + escHtml(nm || "王小明") + '</div>' +
           '<div class="lside">' +
-            '<div class="lch ' + chc + '">' + escHtml(chl) + '</div>' +
-            (tg ? '<div class="lrem">' + escHtml(tg) + '</div>' : "") +
+            '<div class="lqb" style="font-size:' + LAY.qtymm + 'mm">3 / ' + qty + '</div>' +
+            '<div class="lch ' + chc + '" style="font-size:' + LAY.chmm + 'mm">' + escHtml(chl) + '</div>' +
+            (tg ? '<div class="lrem" style="font-size:' + LAY.remmm + 'mm">' + escHtml(tg) + '</div>' : "") +
           '</div>' +
         '</div>' +
         '<div class="lbc" style="height:' + LAY.barmm + 'mm"></div>' +
       '</div>' +
     '</div>' +
-    '<div class="lhand nm"     data-k="nmm"   style="left:0;top:' + Math.max(0, H * 0.28) + 'px">↕ 姓名</div>' +
-    '<div class="lhand bar"    data-k="barmm" style="left:0;top:' + Math.max(26, H - 30) + 'px">↕ 條碼</div>' +
+    '<div class="lhand nm"     data-k="nmm"   style="left:0;top:' + Math.max(0, H * 0.10) + 'px">↕ 姓名</div>' +
+    '<div class="lhand qb"     data-k="qtymm" style="left:0;top:' + Math.max(30, H * 0.34) + 'px">↕ 組數</div>' +
+    '<div class="lhand ch"     data-k="chmm"  style="left:0;top:' + Math.max(60, H * 0.55) + 'px">↕ 郵寄</div>' +
+    '<div class="lhand rem"    data-k="remmm" style="left:0;top:' + Math.max(90, H * 0.76) + 'px">↕ 分類</div>' +
+    '<div class="lhand bar"    data-k="barmm" style="left:0;top:' + Math.max(120, H - 30) + 'px">↕ 條碼</div>' +
+    '<div class="lhand corner" data-k="size"  style="left:' + (78 + W - 10) + 'px;top:' + (H - 10) + 'px">⤡ 大小</div>';
     '<div class="lhand corner" data-k="size"  style="left:' + (78 + W - 10) + 'px;top:' + (H - 10) + 'px">⤡ 大小</div>';
 
   var hs = wrap.querySelectorAll(".lhand"), i;
@@ -995,9 +1023,74 @@ function dragRender(){
     '<span class="d">格子 <b>' + LAY.cw.toFixed(1) + " × " + LAY.ch.toFixed(1) + '</b> mm</span>' +
     '<span class="d">姓名 <b>' + LAY.nmm.toFixed(1) + '</b> mm</span>' +
     '<span class="d">條碼高 <b>' + LAY.barmm.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">郵寄框 <b>' + LAY.chmm.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">分類 <b>' + LAY.remmm.toFixed(1) + '</b> mm</span>' +
+    '<span class="d">組數 <b>' + LAY.qtymm.toFixed(1) + '</b> mm</span>' +
     '<span class="d">A4 一頁約 <b>' + layPerPage() + '</b> 張</span>';
+  pageRender();
 }
 
+
+/* 🖨 整頁預覽：把 A4（210×297mm）縮到 320px 高畫出來，看一頁排得下幾張、
+   最後一排會不會超出紙外。畫的是格子位置和大概的內容，不是真的排版引擎。 */
+function pageRender(){
+  var box = document.getElementById("pageWrap");
+  if(!box) return;
+  var PW = 210, PH = 297;
+  var s = 330 / PH;                       /* 縮放：讓整頁高約 330px */
+  var k = MMPX * s;
+  box.style.width  = (PW * k) + "px";
+  box.style.height = (PH * k) + "px";
+
+  var cols = Math.floor(PW / LAY.cw), rows = Math.floor(PH / LAY.ch);
+  if(cols < 1 || rows < 1){
+    box.innerHTML = "";
+    var o = document.getElementById("pageOver");
+    return;
+  }
+  var m = labMatch();
+  function cell(k2, row){ var c = m.taken[k2]; return c ? String(LAB[c-1].d[row] || "").trim() : ""; }
+  var names = [cell("name",0) || "王小明", cell("name",1) || "陳美玲"];
+  var chs   = [cell("ch",0), cell("ch",1)];
+  function chCls2(ch){
+    if(!ch) return "#999";
+    if(ch.indexOf("郵") >= 0) return "#00913A";
+    if(/7|eleven/i.test(ch)) return "#F07000";
+    if(/全家|family/i.test(ch)) return "#0F6FE0";
+    return "#999";
+  }
+  var h = "", r, c, i = 0;
+  for(r = 0; r < rows; r++){
+    for(c = 0; c < cols; c++){
+      var nmTxt = names[i % 2], chCol = chCls2(chs[i % 2]);
+      i++;
+      h += '<div class="pcell" style="left:' + (c * LAY.cw * k) + 'px;top:' + (r * LAY.ch * k) +
+           'px;width:' + (LAY.cw * k) + 'px;height:' + (LAY.ch * k) + 'px">' +
+             '<div class="prow">' +
+               '<span class="pn" style="font-size:' + Math.max(4, LAY.nmm * k) + 'px">' +
+                 escHtml(nmTxt) + '</span>' +
+               '<span class="pc2" style="height:' + Math.max(3, LAY.chmm * k) +
+                 'px;background:' + chCol + '"></span>' +
+             '</div>' +
+             '<div class="pb2" style="height:' + Math.max(2, LAY.barmm * k) + 'px"></div>' +
+           '</div>';
+    }
+  }
+  box.innerHTML = h;
+
+  var used = document.getElementById("pageUsed");
+  if(!used){
+    used = document.createElement("div");
+    used.id = "pageUsed";
+    used.className = "pageover";
+    box.parentNode.appendChild(used);
+  }
+  var restW = (210 - cols * LAY.cw).toFixed(1), restH = (297 - rows * LAY.ch).toFixed(1);
+  used.style.color = (restW > 8 || restH > 8) ? "#c26a00" : "#0d7a3c";
+  used.innerHTML = "一頁 <b>" + cols + " 欄 × " + rows + " 列 ＝ " + (cols * rows) +
+    " 張</b>　·　右邊剩 " + restW + " mm、下面剩 " + restH + " mm" +
+    ((restW > 8 || restH > 8) ? "（有點浪費，格子可以再調大一點）" : "（剛剛好）");
+}
 /* A4 210×297，邊界抓 0 —— 只是給個概念，真正的排版還是貼紙頁在算 */
 function layPerPage(){
   var c = Math.floor(210 / LAY.cw), r = Math.floor(297 / LAY.ch);
@@ -1010,13 +1103,17 @@ function dragBind(el){
     el.setPointerCapture(ev.pointerId);
     var k = MMPX * LAY_SCALE;
     var x0 = ev.clientX, y0 = ev.clientY;
-    var s0 = { cw:LAY.cw, ch:LAY.ch, nmm:LAY.nmm, barmm:LAY.barmm };
+    var s0 = { cw:LAY.cw, ch:LAY.ch, nmm:LAY.nmm, barmm:LAY.barmm,
+               chmm:LAY.chmm, remmm:LAY.remmm, qtymm:LAY.qtymm };
     var what = el.getAttribute("data-k");
     function move(e){
       var dx = (e.clientX - x0) / k, dy = (e.clientY - y0) / k;   /* 位移換算成 mm */
       if(what === "size"){ LAY.cw = s0.cw + dx; LAY.ch = s0.ch + dy; }
       else if(what === "nmm")   LAY.nmm   = s0.nmm   + dy;        /* 往下拖＝變大 */
       else if(what === "barmm") LAY.barmm = s0.barmm + dy;
+      else if(what === "chmm")  LAY.chmm  = s0.chmm  + dy;
+      else if(what === "remmm") LAY.remmm = s0.remmm + dy;
+      else if(what === "qtymm") LAY.qtymm = s0.qtymm + dy;
       dragRender();
     }
     function up(){
@@ -1034,7 +1131,8 @@ function dragMsg(t, c){
   if(e){ e.textContent = t || ""; e.style.color = c || "#777"; }
 }
 function dragReset(){
-  LAY = { cw:LAY_DEF.cw, ch:LAY_DEF.ch, nmm:LAY_DEF.nmm, barmm:LAY_DEF.barmm };
+  LAY = { cw:LAY_DEF.cw, ch:LAY_DEF.ch, nmm:LAY_DEF.nmm, barmm:LAY_DEF.barmm,
+          chmm:LAY_DEF.chmm, remmm:LAY_DEF.remmm, qtymm:LAY_DEF.qtymm };
   laySave(); dragRender();
   dragMsg("已回到預設 70 × 37 mm", "#00913A");
 }
