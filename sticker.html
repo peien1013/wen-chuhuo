@@ -56,6 +56,32 @@ button:hover{filter:brightness(1.08)}
 button.g{background:var(--ok)}
 button.w{background:#666}
 .hint{font-size:13px;color:#777;line-height:1.7;margin:9px 0 0}
+/* 👆 點一下就不印：不用再進名單框裡刪字，直接在清單上點掉不要的 */
+.pickbox{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#fbfbfd}
+.pickhd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 12px;border-bottom:1px solid var(--line)}
+.pickhd b{font-size:16px}
+.pickhd .sp{flex:1 1 auto}
+.pickcnt{font-size:16px;font-weight:800;color:var(--ok)}
+.pickcnt.some{color:var(--warn)}
+.mini{font-size:14px;font-weight:700;padding:6px 12px;border-radius:8px;
+  background:#fff;color:#555;border:1px solid #ccc;cursor:pointer;font-family:inherit}
+.mini:hover{border-color:var(--brand);color:var(--brand)}
+.picklist{display:flex;flex-wrap:wrap;gap:7px;padding:12px;max-height:290px;overflow-y:auto}
+.pk{display:inline-flex;align-items:baseline;gap:6px;font-size:17px;font-weight:700;
+  padding:7px 12px;border-radius:9px;border:2px solid #d7d9e0;background:#fff;color:#222;
+  cursor:pointer;user-select:none;line-height:1.2}
+.pk:hover{border-color:var(--brand)}
+.pk .c{font-size:13px;font-weight:700;color:#999;letter-spacing:1px}
+.pk .q{font-size:13px;font-weight:900;color:#fff;background:#B45309;
+  border-radius:20px;padding:1px 7px}
+/* 被點掉的：灰底刪除線，一眼看得出來不會印 */
+.pk.off{background:#f0f0f2;border-color:#e2e2e6;color:#aaa;text-decoration:line-through}
+.pk.off .c{color:#c8c8cc}
+.pk.off .q{background:#c8c8cc}
+.pickwarn{padding:0 12px 12px;font-size:16px;font-weight:800;color:var(--warn)}
+/* 預覽上的貼紙也能直接點掉，跟上面那排連動 */
+.cell.skipped{opacity:.22;outline:2px dashed #c00 !important}
 .hint b{color:var(--warn)}
 .tag{display:inline-block;background:#eef4ff;color:var(--brand);border-radius:20px;
   padding:3px 11px;font-size:13px;font-weight:700;margin-right:6px}
@@ -96,6 +122,7 @@ button.w{background:#666}
 /* 左右留 4mm ——「無邊界列印」實際上印不到紙的最邊邊，內容太靠邊會被切掉 */
 /* 左右各留 6mm —— 3 欄 × 70mm ＝ 210mm 剛好是 A4 全寬，最外圈的格子邊緣就是紙邊，
    噴墨印不到那裡。內容一定要退進來，不然最左的姓和最右的備註會被切掉。 */
+.cell{cursor:pointer}   /* 點預覽上的貼紙可以取消不印 */
 .cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 6mm;text-align:left}
 /* 姓名和右邊小字群「黏在一起」，不要一個推到最左、一個推到最右 ——
    小字貼著紙邊有被裁掉的風險，而且看起來太散。 */
@@ -157,6 +184,18 @@ button.w{background:#666}
               title="已經印好又掃過的人就不用再出現，只留下還沒掃到的">🔎 只留還沒掃到的</button>
       <button type="button" class="w" onclick="showAllNames()">↺ 放回完整名單</button>
       <span id="filtmsg" class="hint" style="margin:0"></span>
+    </div>
+    <div class="pickbox">
+      <div class="pickhd">
+        <b>👆 點一下就不印</b>
+        <span class="pickcnt" id="pickCnt"></span>
+        <span class="sp"></span>
+        <button type="button" class="mini" onclick="pickAll()">全部要印</button>
+        <button type="button" class="mini" onclick="pickNone()">全部不印</button>
+        <button type="button" class="mini" onclick="pickInvert()">反過來</button>
+      </div>
+      <div class="picklist" id="pickList"></div>
+      <div class="pickwarn" id="pickWarn"></div>
     </div>
     <p class="hint">
       一行一個人，用逗號分開：<b>姓名,備註,編號,通路</b>（後面三個都可以留空）。<br>
@@ -938,6 +977,7 @@ function cellEl(it, r, c, opt){
   var centered = (opt.layout === "nameonly" || opt.layout === "noqr");
   d.className = "cell" + (isBar ? " vert" : (centered ? " center" : "")) +
                 (isCh ? " chlay" : "") + (grp ? " grp" + grp.c : "");
+  d.setAttribute("data-code", it.code);   /* 讓人直接點預覽上的貼紙就能取消不印 */
   d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
   d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
   d.style.width  = opt.cw + "mm";
@@ -1089,9 +1129,77 @@ function cropMarks(sheet, opt){
   }
 }
 
+
+/* ===== 👆 點一下就不印 =====
+   使用者不想再進名單框裡刪字。清單上每個人一顆，點一下變灰＝這次不印。
+   用編號當 key，所以重新撈名單、換篩選都還記得。存 localStorage，
+   但只要有人被點掉就在畫面上大聲提示，免得下次開頁莫名其妙少印。 */
+var SKIP_KEY = "wenChuhuoSkip";
+var SKIP = {};
+try { SKIP = JSON.parse(localStorage.getItem(SKIP_KEY) || "{}") || {}; } catch(e){ SKIP = {}; }
+function skipSave(){ try { localStorage.setItem(SKIP_KEY, JSON.stringify(SKIP)); } catch(e){} }
+function isSkipped(code){ return !!SKIP[String(code || "").toUpperCase()]; }
+
+function pickToggle(code){
+  var k = String(code || "").toUpperCase();
+  if(!k) return;
+  if(SKIP[k]) delete SKIP[k]; else SKIP[k] = 1;
+  skipSave();
+  render();
+}
+function pickAll(){  SKIP = {}; skipSave(); render(); }
+function pickNone(){
+  var ppl = parseList(), i;
+  SKIP = {};
+  for(i = 0; i < ppl.length; i++) SKIP[String(ppl[i].code).toUpperCase()] = 1;
+  skipSave(); render();
+}
+function pickInvert(){
+  var ppl = parseList(), i, k, nu = {};
+  for(i = 0; i < ppl.length; i++){
+    k = String(ppl[i].code).toUpperCase();
+    if(!SKIP[k]) nu[k] = 1;
+  }
+  SKIP = nu; skipSave(); render();
+}
+
+/* 清單本身。people 是「名單框裡全部的人」，不是篩選後的。 */
+function pickRender(people){
+  var box = $("pickList");
+  if(!box) return;
+  var h = "", i, p, off, n = 0, sheets = 0, offN = 0;
+  for(i = 0; i < people.length; i++){
+    p = people[i];
+    off = isSkipped(p.code);
+    if(off) offN++; else { n++; sheets += (p.qty || 1); }
+    h += '<span class="pk' + (off ? " off" : "") + '" onclick="pickToggle(\'' +
+         esc(String(p.code).replace(/'/g, "")) + '\')" title="' +
+         (off ? "點一下改成要印" : "點一下就不印") + '">' +
+         esc(p.name) +
+         ((p.qty || 1) > 1 ? '<span class="q">×' + p.qty + "</span>" : "") +
+         '<span class="c">' + esc(p.code) + "</span></span>";
+  }
+  box.innerHTML = h || '<span class="hint" style="margin:0">名單是空的</span>';
+
+  var cnt = $("pickCnt");
+  if(cnt){
+    cnt.textContent = "要印 " + n + " 人 / " + sheets + " 張";
+    cnt.className = "pickcnt" + (offN ? " some" : "");
+  }
+  var w = $("pickWarn");
+  if(w) w.textContent = offN
+    ? "⚠ 有 " + offN + " 個人被你點掉、這次不會印（要全部印回來就按「全部要印」）"
+    : "";
+}
+
 function render(){
-  var people = parseList();
-  if(!people.length){ msg("名單是空的，先在上面貼姓名", "#c00"); return; }
+  var all = parseList();
+  pickRender(all);                                   /* 上面那排「點一下就不印」 */
+  /* 被點掉的不進印刷佇列 —— 預覽和列印看到的一定一樣 */
+  var people = [], _i;
+  for(_i = 0; _i < all.length; _i++) if(!isSkipped(all[_i].code)) people.push(all[_i]);
+  if(!all.length){ msg("名單是空的，先在上面貼姓名", "#c00"); return; }
+  if(!people.length){ $("out").innerHTML = ""; msg("全部都被點掉了，沒有東西可以印", "#c00"); return; }
 
   /* 一個人訂幾組就印幾張（試算表的「組數」欄）。「每人印幾張」是再乘上去的。
      多組的會標上第幾張，例如 3/8，方便一邊貼一邊數。 */
@@ -1255,6 +1363,14 @@ window.addEventListener("DOMContentLoaded", function(){
     }
   }
   $("layout").addEventListener("change", onLayoutChange);
+  /* 預覽上的貼紙直接點也能取消 —— 使用者要「用點的」，兩邊連動 */
+  $("out").addEventListener("click", function(ev){
+    var cell = ev.target.closest ? ev.target.closest(".cell") : null;
+    if(!cell) return;
+    var code = cell.getAttribute("data-code");
+    if(code) pickToggle(code);
+  });
+
   var ids = ["cols","rows","cw","ch","ml","mt","gx","gy","qrmm","barmm","nmm","skip",
              "chmm","remmm","qtymm",
              "copies","prefix","startNo","pad","cutline"];
