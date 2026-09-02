@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>郵局出貨 — 點一點就產檔</title>
+<style>
+:root{ --brand:#7b3fd4; --ok:#00913A; --warn:#c26a00; --line:#e3e5ea;
+       --bg:#f6f5f9; --card:#fff; --ink:#222 }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif}
+.wrap{max-width:1500px;margin:0 auto;padding:16px 18px 60px}
+.back{display:inline-flex;align-items:center;gap:7px;font-size:15px;font-weight:700;
+  color:#666;text-decoration:none;padding:8px 16px;border:1px solid var(--line);
+  border-radius:22px;background:#fff;margin-bottom:16px}
+.back:hover{border-color:var(--brand);color:var(--brand)}
+h1{font-size:27px;margin:0 0 4px}
+.sub{color:#666;font-size:16px;margin:0 0 18px}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:14px}
+.panel h2{font-size:19px;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid #eee}
+
+/* 通路切換 */
+.modes{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.mode{font-size:18px;font-weight:800;padding:10px 22px;border:2px solid #ccc;
+  border-radius:10px;background:#fff;color:#666;cursor:pointer;font-family:inherit}
+.mode.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.mode .n{display:inline-block;min-width:1.5em;margin-left:7px;padding:1px 8px;
+  border-radius:999px;background:#eee;color:#444;font-size:15px}
+.mode.on .n{background:rgba(255,255,255,.3);color:#fff}
+.hint{font-size:15px;color:#777;line-height:1.8;margin:8px 0 0}
+.hint b{color:var(--warn)}
+
+/* 箱子卡片 —— 一箱一張單 */
+.boxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.bx{border:2px solid var(--line);border-radius:12px;background:#fff;padding:13px 15px;
+  transition:.12s}
+.bx.off{opacity:.42;background:#f3f3f5}
+.bx .hd{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bx .nm{font-size:22px;font-weight:900;flex:1 1 auto;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.bx .pick{width:26px;height:26px;flex:0 0 auto;cursor:pointer}
+.bx .ph{font-size:16px;color:#555;font-weight:700;letter-spacing:.5px}
+.bx .ad{font-size:16px;color:#333;line-height:1.6;margin:4px 0 8px}
+.bx .who{font-size:14px;color:#888;line-height:1.6;margin-bottom:8px}
+.bx .row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qtybox{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:9px;
+  overflow:hidden}
+.qtybox button{width:38px;height:38px;border:0;background:#f2f2f5;font-size:22px;
+  font-weight:900;color:#555;cursor:pointer;font-family:inherit}
+.qtybox button:hover{background:#e6e1f5;color:var(--brand)}
+.qtybox .v{min-width:56px;text-align:center;font-size:20px;font-weight:900}
+.qtybox .u{font-size:15px;color:#888;padding-right:10px}
+.sel{font-size:16px;padding:8px 10px;border:2px solid var(--line);border-radius:9px;
+  font-family:inherit;background:#fff}
+.calc{margin-top:9px;font-size:16px;font-weight:800;color:var(--ok);line-height:1.7}
+.calc .w{color:#333}
+.calc .bad{color:#c00}
+.bx .warn{font-size:14px;color:#c00;font-weight:800}
+
+/* 底部合計 */
+.total{position:sticky;bottom:0;background:#fff;border-top:3px solid var(--brand);
+  padding:14px 18px;margin:0 -18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  box-shadow:0 -4px 14px rgba(0,0,0,.08)}
+.total .big{font-size:22px;font-weight:900}
+.total .sp{flex:1 1 auto}
+.gen{font-size:19px;font-weight:800;padding:13px 28px;border:0;border-radius:10px;
+  background:var(--ok);color:#fff;cursor:pointer;font-family:inherit}
+.gen:hover{filter:brightness(1.08)}
+.gen[disabled]{background:#bbb;cursor:not-allowed}
+.msg{font-size:16px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 回出貨總入口</a>
+  <h1>📮 郵局出貨</h1>
+  <p class="sub">點要寄的、調組數，按一下就產生郵局官方格式的上傳檔</p>
+
+  <div class="panel">
+    <div class="modes">
+      <button class="mode on" id="mPost"  onclick="setCh('i郵箱')">i郵箱<span class="n" id="nPost">0</span></button>
+      <button class="mode"    id="mAll"   onclick="setCh('')">全部要寄的<span class="n" id="nAll">0</span></button>
+      <span class="msg" id="sync">讀取中…</span>
+    </div>
+    <p class="hint">
+      <b>一箱一張單</b>：試算表上「收件人」相同的人會自動併成一箱（他們本來就寄同一個地址）。<br>
+      組數預設是試算表上的數字，覺得不對就用 <b>＋ −</b> 改。不想寄的把左邊的勾勾點掉。
+    </p>
+  </div>
+
+  <div class="boxes" id="boxes"></div>
+
+  <div class="total">
+    <span class="big" id="tCount">選了 0 箱</span>
+    <span class="big" id="tFee" style="color:var(--warn)"></span>
+    <span class="sp"></span>
+    <span class="msg" id="genMsg"></span>
+    <button class="gen" id="btnGen" onclick="genFiles()">📄 產生郵局上傳檔</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* ===== 設定 ===== */
+var API = "https://script.google.com/macros/s/AKfycbwFy68m0LzFYHILxz89qKQy2TmIHfw2B2_exilrMHKPR_A5ALL6m3GpgRu5yjDKAWwF/exec";
+var PASS_KEY = "wenChuhuoPass";
+var TPL = { small: "範本/官方_掛號小包批次建立上傳檔.xlsx",
+            pkg:   "範本/官方_國內包裹批次建立上傳檔.xlsx" };
+
+/* 商品單瓶淨重（實際量測）*/
+var G_LZ = 66, G_CC = 106;
+/* 包材（自重與上限來自 2026-09-01 郵局執據 12 筆實測）*/
+var PACK = {
+  bag:  { name:"自備袋",  str:"0.自備箱袋",                              self:10, perSet:true,  kind:"small" },
+  cvn:  { name:"便利袋",  str:"51.首次_bag1_一般便利袋:31×23×3(cm)",     self:25, perSet:false, kind:"small", flat:60 },
+  box:  { name:"紙箱",    str:"0.自備箱袋(信封)",                        self:287,perSet:false, kind:"pkg",   flat:80 }
+};
+var MAXSET_SMALL = 4;      /* 小包實際做到 4 組（726g）；5 組以上改紙箱 */
+/* 寄件人固定值 */
+var S = { name:"呂佩恩", phone:"0919876633",
+          addr:"高雄市苓雅區三多四路63號10樓之9", zip:"802" };
+
+var ROSTER = [], BOXES = [], CH = "i郵箱", ZIP = {};
+
+/* ===== 小工具 ===== */
+function $(id){ return document.getElementById(id) }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }) }
+function getPass(){ try{ return localStorage.getItem(PASS_KEY)||"" }catch(e){ return "" } }
+function setPass(v){ try{ localStorage.setItem(PASS_KEY,v) }catch(e){} }
+
+function jsonp(params, cb){
+  var name = "cb" + Math.random().toString(36).slice(2);
+  var done = false;
+  window[name] = function(res){ done = true; cleanup(); cb(res) };
+  var qs = [];
+  for(var k in params) qs.push(encodeURIComponent(k)+"="+encodeURIComponent(params[k]));
+  qs.push("token=" + encodeURIComponent(getPass()));
+  qs.push("callback=" + name);
+  var s = document.createElement("script");
+  s.src = API + "?" + qs.join("&");
+  s.onerror = function(){ if(!done){ cleanup(); cb({ok:false,error:"連不上"}) } };
+  document.body.appendChild(s);
+  var t = setTimeout(function(){ if(!done){ cleanup(); cb({ok:false,error:"逾時"}) } }, 25000);
+  function cleanup(){ clearTimeout(t); try{ delete window[name] }catch(e){ window[name]=null }
+    if(s.parentNode) s.parentNode.removeChild(s) }
+}
+
+/* ===== 把名單併成「箱」 ===== */
+/* 試算表上「收件人姓名」相同＝同一箱，他們本來就寄到同一個地址 */
+function buildBoxes(){
+  var map = {}, order = [], i, p, key;
+  for(i = 0; i < ROSTER.length; i++){
+    p = ROSTER[i];
+    if(!p.ch) continue;                       /* 沒通路＝自取，不用寄 */
+    if(CH && p.ch !== CH) continue;
+    if(!p.addr) continue;                     /* 沒地址不能寄 */
+    key = (p.box || p.name) + "|" + p.addr;
+    if(!map[key]){
+      map[key] = { owner:p.box || p.name, phone:p.phone, addr:p.addr, ch:p.ch,
+                   who:[], sets:0, on:true, pack:"" };
+      order.push(key);
+    }
+    map[key].who.push(p.name);
+    map[key].sets += (p.qty || 1);
+  }
+  BOXES = order.map(function(k){ return map[k] });
+}
+
+/* ===== 地址拆縣市／行政區 ===== */
+/* 郵遞區號表的 key 是「臺北市-中正區」，所以要從地址前面切出這兩段 */
+function splitAddr(a){
+  a = String(a || "").replace(/^台/, "臺");
+  var m = a.match(/^(.{2,3}?[市縣])(.{1,4}?[區鄉鎮市])/);
+  if(!m) return null;
+  return { city:m[1], dist:m[2], zip: ZIP[m[1] + "-" + m[2]] || "" };
+}
+
+/* ===== 算重量／包材／郵資 ===== */
+function calc(b){
+  var sets = b.sets;
+  var net  = sets * (G_LZ + G_CC);
+  var pk   = b.pack;
+  if(!pk) pk = (sets <= MAXSET_SMALL) ? "bag" : "box";
+  var P = PACK[pk];
+  var self = P.perSet ? P.self * sets : P.self;
+  var total = net + self;
+  var fee;
+  if(P.flat) fee = P.flat;
+  else fee = (total <= 250) ? 36 : (total <= 500 ? 48 : (total <= 1000 ? 60 : 0));
+  return { pk:pk, P:P, net:net, total:total, fee:fee, sets:sets,
+           over:(!P.flat && fee === 0) };
+}
+
+/* ===== 畫面 ===== */
+function render(){
+  var h = "", i, b, c, sp;
+  for(i = 0; i < BOXES.length; i++){
+    b = BOXES[i]; c = calc(b); sp = splitAddr(b.addr);
+    h += '<div class="bx' + (b.on ? "" : " off") + '">' +
+      '<div class="hd">' +
+        '<input class="pick" type="checkbox"' + (b.on ? " checked" : "") +
+          ' onchange="toggle(' + i + ')">' +
+        '<span class="nm">' + esc(b.owner) + '</span>' +
+        '<span class="ph">' + esc(b.phone) + '</span>' +
+      '</div>' +
+      '<div class="ad">' + esc(b.addr) +
+        (sp && sp.zip ? ' <b style="color:#7b3fd4">' + sp.zip + '</b>'
+                      : ' <span class="warn">⚠ 查不到郵遞區號</span>') + '</div>' +
+      (b.who.length > 1 ? '<div class="who">同箱：' + b.who.map(esc).join("、") + '</div>' : '') +
+      '<div class="row2">' +
+        '<span class="qtybox">' +
+          '<button onclick="bump(' + i + ',-1)">−</button>' +
+          '<span class="v">' + b.sets + '</span><span class="u">組</span>' +
+          '<button onclick="bump(' + i + ',1)">＋</button>' +
+        '</span>' +
+        '<select class="sel" onchange="setPack(' + i + ',this.value)">' +
+          '<option value=""' + (b.pack===""?" selected":"") + '>包材：自動</option>' +
+          '<option value="bag"' + (b.pack==="bag"?" selected":"") + '>自備袋</option>' +
+          '<option value="cvn"' + (b.pack==="cvn"?" selected":"") + '>便利袋（均一價60）</option>' +
+          '<option value="box"' + (b.pack==="box"?" selected":"") + '>紙箱（國內包裹）</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="calc">' + c.P.name + '　<span class="w">約 ' + c.total + ' g</span>　' +
+        (c.P.kind === "small" ? "普通掛號小包" : "國內包裹") + '　' +
+        (c.over ? '<span class="bad">⚠ 超過 1kg，資費要查</span>' : '約 ' + c.fee + ' 元') +
+      '</div>' +
+    '</div>';
+  }
+  $("boxes").innerHTML = h || '<div class="panel">這個通路沒有要寄的人</div>';
+  updateTotal();
+}
+function updateTotal(){
+  var n = 0, fee = 0, i, c;
+  for(i = 0; i < BOXES.length; i++){
+    if(!BOXES[i].on) continue;
+    n++; c = calc(BOXES[i]); fee += c.fee;
+  }
+  $("tCount").textContent = "選了 " + n + " 箱";
+  $("tFee").textContent = fee ? ("估計郵資 " + fee + " 元") : "";
+  $("btnGen").disabled = (n === 0);
+}
+function toggle(i){ BOXES[i].on = !BOXES[i].on; render() }
+function bump(i, d){ BOXES[i].sets = Math.max(1, Math.min(99, BOXES[i].sets + d)); render() }
+function setPack(i, v){ BOXES[i].pack = v; render() }
+function setCh(ch){
+  CH = ch;
+  $("mPost").className = "mode" + (ch === "i郵箱" ? " on" : "");
+  $("mAll").className  = "mode" + (ch === "" ? " on" : "");
+  buildBoxes(); render();
+}
+
+/* ===== 產生 xlsx ===== */
+/* 官方範本的代碼欄都是 VLOOKUP 公式，我們不重算 → 每一欄都要算好寫死。
+   詳見 郵局範本規格.md */
+function cellS(ref, v){
+  if(v === "" || v == null) return "";
+  return '<c r="' + ref + '" t="str"><v>' + esc(v) + '</v></c>';
+}
+function cellN(ref, v){
+  if(v === "" || v == null) return "";
+  return '<c r="' + ref + '"><v>' + v + '</v></c>';
+}
+function rowXml(kind, n, d){
+  var r = n + 4, x = '<row r="' + r + '" spans="1:30">' + cellN("A" + r, n);
+  if(kind === "small"){
+    x += cellS("B"+r,"普通掛號小包") + cellS("C"+r,d.name) + cellS("D"+r,d.phone) +
+         cellS("E"+r,"一般地址") + cellS("F"+r,d.addr) +
+         cellS("K"+r,S.name) + cellS("L"+r,S.phone) + cellS("M"+r,S.addr) +
+         cellN("Q"+r,(d.total/1000).toFixed(3)) + cellS("R"+r,d.pkstr) +
+         cellS("T"+r,"001") + cellN("U"+r,d.zip) + cellN("V"+r,S.zip) +
+         cellS("W"+r,"320") + cellS("X"+r,d.pkcode) + cellS("Y"+r,"203");
+  } else {
+    x += cellS("B"+r,d.name) + cellS("C"+r,d.phone) + cellS("D"+r,"一般地址") +
+         cellS("E"+r,d.addr) +
+         cellS("J"+r,S.name) + cellS("K"+r,S.phone) + cellS("L"+r,S.addr) +
+         cellS("P"+r,"其他") + cellS("Q"+r,"保健食品") +
+         cellN("R"+r,(d.total/1000).toFixed(3)) + cellS("S"+r,d.pkstr) + cellN("T"+r,60) +
+         cellS("V"+r,"退回寄件人(另付退回費)") +
+         cellS("W"+r,"B") + cellS("X"+r,"保健食品") + cellS("Y"+r,"001") + cellS("Z"+r,"001") +
+         cellN("AA"+r,d.zip) + cellN("AB"+r,S.zip) + cellS("AC"+r,d.pkcode) + cellS("AD"+r,"202");
+  }
+  return x + "</row>";
+}
+var PKCODE = { "0.自備箱袋":"0", "0.自備箱袋(信封)":"0",
+               "51.首次_bag1_一般便利袋:31×23×3(cm)":"51" };
+
+function buildXlsx(kind, rows, cb){
+  fetch(TPL[kind]).then(function(r){
+    if(!r.ok) throw new Error("讀不到範本 " + TPL[kind]);
+    return r.arrayBuffer();
+  }).then(function(buf){
+    return JSZip.loadAsync(buf);
+  }).then(function(zip){
+    /* 「託運清單(整段地址)」是哪個 sheetN.xml —— rId 順序不等於檔名順序，要查 rels */
+    return zip.file("xl/workbook.xml").async("string").then(function(wb){
+      var m = wb.match(/<sheet[^>]*name="託運清單\(整段地址\)"[^>]*r:id="([^"]+)"/);
+      if(!m) throw new Error("範本裡找不到「託運清單(整段地址)」");
+      return zip.file("xl/_rels/workbook.xml.rels").async("string").then(function(rels){
+        var re = new RegExp('Id="' + m[1] + '"[^>]*Target="(worksheets/[^"]+)"');
+        var mm = rels.match(re);
+        if(!mm){
+          re = new RegExp('Target="(worksheets/[^"]+)"[^>]*Id="' + m[1] + '"');
+          mm = rels.match(re);
+        }
+        if(!mm) throw new Error("對不到工作表檔名");
+        var path = "xl/" + mm[1];
+        return zip.file(path).async("string").then(function(xml){
+          /* 只換掉第 5 列以後；前 4 列（系統欄位／說明／空白／中文標題）留著 */
+          var body = "";
+          for(var i = 0; i < rows.length; i++) body += rowXml(kind, i + 1, rows[i]);
+          var out = xml.replace(/<row r="(\d+)"[\s\S]*?<\/row>/g, function(all, r){
+            return (+r >= 5) ? "" : all;
+          }).replace("</sheetData>", body + "</sheetData>");
+          zip.file(path, out);
+          return zip.generateAsync({ type:"blob",
+            mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        });
+      });
+    });
+  }).then(function(blob){ cb(null, blob) })
+    .catch(function(e){ cb(e) });
+}
+
+function dl(blob, filename){
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove() }, 3000);
+}
+
+function genFiles(){
+  var small = [], pkg = [], i, b, c, sp, bad = [];
+  for(i = 0; i < BOXES.length; i++){
+    b = BOXES[i]; if(!b.on) continue;
+    c = calc(b); sp = splitAddr(b.addr);
+    if(!sp || !sp.zip){ bad.push(b.owner); continue; }
+    var d = { name:b.owner, phone:b.phone, addr:b.addr, zip:sp.zip,
+              total:c.total, pkstr:c.P.str, pkcode:PKCODE[c.P.str] || "0" };
+    (c.P.kind === "small" ? small : pkg).push(d);
+  }
+  if(bad.length){
+    $("genMsg").textContent = "⚠ 這幾位地址拆不出郵遞區號，先跳過：" + bad.join("、");
+    $("genMsg").style.color = "#c00";
+  } else { $("genMsg").textContent = "產檔中…"; $("genMsg").style.color = "#666" }
+  if(!small.length && !pkg.length) return;
+
+  var stamp = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  var todo = 0, errs = [];
+  function done(){ if(--todo === 0){
+    $("genMsg").textContent = errs.length ? ("✖ " + errs.join("；")) : "✅ 產好了，看瀏覽器的下載";
+    $("genMsg").style.color = errs.length ? "#c00" : "#00913A";
+  } }
+  if(small.length){ todo++; buildXlsx("small", small, function(e, blob){
+    if(e) errs.push(e.message); else dl(blob, "郵局_掛號小包_" + stamp + ".xlsx"); done(); }) }
+  if(pkg.length){ todo++; buildXlsx("pkg", pkg, function(e, blob){
+    if(e) errs.push(e.message); else dl(blob, "郵局_國內包裹_" + stamp + ".xlsx"); done(); }) }
+}
+
+/* ===== 開頁 ===== */
+function boot(){
+  fetch("郵遞區號.tsv").then(function(r){ return r.ok ? r.text() : "" }).then(function(t){
+    t.split("\n").forEach(function(l){
+      var p = l.split("\t"); if(p.length >= 2) ZIP[p[0].trim()] = p[1].trim();
+    });
+  }).catch(function(){}).then(function(){
+    $("sync").textContent = "正在跟試算表要名單…";
+    jsonp({ action:"roster" }, function(res){
+      if(!res.ok){ $("sync").textContent = "✖ " + (res.error || "撈不到名單"); return }
+      ROSTER = res.data || [];
+      var np = 0, na = 0;
+      ROSTER.forEach(function(p){ if(p.ch && p.addr){ na++; if(p.ch === "i郵箱") np++ } });
+      $("nPost").textContent = np; $("nAll").textContent = na;
+      $("sync").textContent = "✅ 名單 " + ROSTER.length + " 人";
+      $("sync").style.color = "#00913A";
+      buildBoxes(); render();
+    });
+  });
+}
+if(!getPass()){
+  var v = window.prompt("請輸入通行碼：");
+  if(v) setPass(v);
+}
+boot();
+</script>
+</body>
+</html>
