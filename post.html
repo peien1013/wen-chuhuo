@@ -316,7 +316,8 @@ function buildXlsx(kind, rows, cb){
             return (+r >= 5) ? "" : all;
           }).replace("</sheetData>", body + "</sheetData>");
           zip.file(path, out);
-          return zip.generateAsync({ type:"blob",
+          return zip.generateAsync({ type:"blob", compression:"DEFLATE",
+            compressionOptions:{ level:6 },   /* 不指定的話 JSZip 預設不壓縮，檔案會胖一倍 */
             mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         });
       });
