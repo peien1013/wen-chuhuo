@@ -123,6 +123,14 @@ button.w{background:#666}
 /* 左右各留 6mm —— 3 欄 × 70mm ＝ 210mm 剛好是 A4 全寬，最外圈的格子邊緣就是紙邊，
    噴墨印不到那裡。內容一定要退進來，不然最左的姓和最右的備註會被切掉。 */
 .cell{cursor:pointer}   /* 點預覽上的貼紙可以取消不印 */
+/* 批次標：印在最後一格，紙拿到手掃它才算「已列印」。
+   故意跟別的貼紙長得不一樣，才不會貼錯到商品上。 */
+.cell.batchlab{flex-direction:column;justify-content:center;align-items:center;
+  gap:.8mm;padding:1.5mm 4mm;background:#fff8dc;border:0.5mm dashed #B45309;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cell.batchlab .bt{font-size:4.2mm;font-weight:900;color:#B45309;white-space:nowrap}
+.cell.batchlab .bn{font-size:3.4mm;font-weight:800;color:#7a4a00;letter-spacing:.3mm}
+.cell.batchlab .bc{width:100%;display:flex;justify-content:center}
 .cell.chlay{justify-content:center;gap:1mm;padding:1.2mm 6mm;text-align:left}
 /* 姓名和右邊小字群「黏在一起」，不要一個推到最左、一個推到最右 ——
    小字貼著紙邊有被裁掉的風險，而且看起來太散。 */
@@ -971,6 +979,22 @@ function barSvg(text, wMm, hMm){
 
 function cellEl(it, r, c, opt){
   var d = document.createElement("div");
+
+  /* 批次標：不是人，是「這批印好了」那張。掃它才算已列印。 */
+  if(it.batch){
+    d.className = "cell batchlab";
+    d.setAttribute("data-code", it.code);
+    d.style.left   = (opt.ml + c*(opt.cw + opt.gx)) + "mm";
+    d.style.top    = (opt.mt + r*(opt.ch + opt.gy)) + "mm";
+    d.style.width  = opt.cw + "mm";
+    d.style.height = opt.ch + "mm";
+    d.innerHTML =
+      '<div class="bt">🖨 這批印好了 → 掃我</div>' +
+      '<div class="bc">' + barSvg(it.code, Math.max(10, opt.cw - 13), opt.barmm) + "</div>" +
+      '<div class="bn">' + esc(it.code) + "　" + it.n + " 張</div>";
+    return d;
+  }
+
   var isCh  = (opt.layout === "barch");
   var grp = isCh ? GROUPS[it.code] : null;
   var isBar = (opt.layout === "bar" || opt.layout === "barbig" || isCh);
@@ -1215,6 +1239,11 @@ function render(){
     }
   }
 
+  /* 最後多印一張「批次標」：紙拿到手、看過沒問題才掃它，那一批才算已列印。
+     不佔用真的貼紙 —— 一頁 24 格通常印不滿，它就補在後面那格。 */
+  items.push({ batch:true, name:"這批印好了", code:BATCH, tag:"掃我", qty:1, seq:1,
+               n:items.length });
+
   var opt = readOpt();
   codeWarn = null;
   var perPage = opt.cols * opt.rows;
@@ -1300,9 +1329,40 @@ function testPage(){
   msg("對位測試頁好了 — 用普通白紙印一張，量綠框是不是 100mm，再疊到貼紙上對光看", "#c26a00");
 }
 
+
+/* ===== 🖨 列印批次 =====
+   使用者的作法：印出來的最後多一張「批次標」，紙拿到手、看過沒問題才掃它，
+   那一批才算「已列印」。卡紙、墨沒吃上去的自然不會被誤記（S179~S181 就是卡紙）。
+   批次碼用開頁時間，同一次開頁重印是同一批（後台會更新那一列，不會越積越多）。 */
+function batchId(){
+  var d = new Date(), p = function(n){ return (n<10?"0":"") + n };
+  return "P-" + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) +
+         "-" + p(d.getHours()) + p(d.getMinutes());
+}
+var BATCH = batchId();
+
+/* 按列印時把這一批的編號送去後台記起來（還沒確認，掃批次標才算數）*/
+function reportBatch(codes, cb){
+  if(!codes.length){ if(cb) cb(); return }
+  api({ action:"printbatch", batch:BATCH, codes:codes.join(",") }, function(res){
+    if(!res.ok) msg("⚠ 批次沒記錄到（" + (res.error||"") + "），還是可以印", "#c26a00");
+    if(cb) cb();
+  });
+}
+
 function doPrint(){
   if(!$("out").children.length){ msg("先按「產生貼紙」", "#c00"); return; }
-  window.print();
+  /* 先把這批記到後台，再叫列印。記錄失敗不擋列印 —— 紙比較重要。 */
+  var codes = [], seen = {}, cells = document.querySelectorAll("#out .cell[data-code]"), i, c;
+  for(i = 0; i < cells.length; i++){
+    c = cells[i].getAttribute("data-code");
+    if(c && c.indexOf("P-") !== 0 && !seen[c]){ seen[c] = 1; codes.push(c) }
+  }
+  msg("正在記錄批次 " + BATCH + "…", "#0f6fe0");
+  reportBatch(codes, function(){
+    msg("批次 " + BATCH + "（" + codes.length + " 人）—— 印好記得掃最後那張批次標", "#00913A");
+    window.print();
+  });
 }
 
 
