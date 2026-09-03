@@ -63,6 +63,9 @@ h1{font-size:27px;margin:0 0 4px}
 .drop{display:inline-block;margin-top:7px;font-size:15px;font-weight:800;padding:3px 11px;border-radius:999px}
 .drop.ibox{background:#e9f9ee;color:#00713A;border:1.5px solid #9fd9b3}
 .drop.counter{background:#fff3e6;color:#9a4b00;border:1.5px solid #f0b980}
+.kd{display:inline-block;font-size:13px;font-weight:900;padding:1px 8px;border-radius:6px;color:#fff;vertical-align:middle}
+.kd.home{background:#00913A} .kd.ibox{background:#7b3fd4}
+.sub2{font-size:14px;color:#777}
 
 /* 底部合計 */
 .total{position:sticky;bottom:0;background:#fff;border-top:3px solid var(--brand);
@@ -85,14 +88,16 @@ h1{font-size:27px;margin:0 0 4px}
 
   <div class="panel">
     <div class="modes">
-      <button class="mode on" id="mPost"  onclick="setCh('i郵箱')">i郵箱<span class="n" id="nPost">0</span></button>
+      <button class="mode on" id="mHome"  onclick="setCh('home')">🏠 郵寄到府<span class="n" id="nHome">0</span></button>
+      <button class="mode"    id="mIbox"  onclick="setCh('ibox')">📦 i郵箱自取<span class="n" id="nIbox">0</span></button>
       <button class="mode"    id="mAll"   onclick="setCh('')">全部要寄的<span class="n" id="nAll">0</span></button>
       <span class="msg" id="sync">讀取中…</span>
     </div>
     <p class="hint">
       <b>一箱一張單</b>：試算表上「收件人」相同的人會自動併成一箱（他們本來就寄同一個地址）。<br>
       組數預設是試算表上的數字，覺得不對就用 <b>＋ −</b> 改。不想寄的把左邊的勾勾點掉。<br>
-      每箱下面會標 <b>🕘 可投 i郵箱</b>（晚上、假日也能寄）或 <b>🏤 要去櫃台</b>（紙箱放不進 i郵箱）。
+      每箱下面會標 <b>🕘 可投 i郵箱</b>（晚上、假日也能寄）或 <b>🏤 要去櫃台</b>（紙箱放不進 i郵箱）。<br>
+      <b>🏠 郵寄到府</b>＝寄到收件地址（託運單 001）；<b>📦 i郵箱自取</b>＝寄到客人選的那台 i郵箱（託運單 002，只能小包、不可報值）。
     </p>
   </div>
 
@@ -128,7 +133,16 @@ var MAXSET_SMALL = 4;      /* 小包實際做到 4 組（726g）；5 組以上�
 var S = { name:"呂佩恩", phone:"0919876633",
           addr:"高雄市苓雅區三多四路63號10樓之9", zip:"802" };
 
-var ROSTER = [], BOXES = [], CH = "i郵箱", ZIP = {};
+var ROSTER = [], BOXES = [], CH = "home", ZIP = {};
+
+/* 通路欄長什麼樣都認：「郵寄到府」「i郵箱」（舊資料，＝寄到家）→ home；「i郵箱取件」→ ibox；空白＝自取 */
+function kindOf(ch){
+  ch = String(ch || "").trim();
+  if(!ch) return "";
+  if(/i ?郵箱(取件|自取)|取件/i.test(ch)) return "ibox";
+  if(/郵|寄|宅|post/i.test(ch)) return "home";
+  return "other";              /* 7-11／全家那些（暫停中），這頁不處理 */
+}
 
 /* ===== 小工具 ===== */
 function $(id){ return document.getElementById(id) }
@@ -155,17 +169,21 @@ function jsonp(params, cb){
 }
 
 /* ===== 把名單併成「箱」 ===== */
-/* 試算表上「收件人姓名」相同＝同一箱，他們本來就寄到同一個地址 */
+/* 試算表上「收件人」相同＝同一箱，他們本來就寄到同一個地方。
+   郵寄到府＝寄到收件地址；i郵箱取件＝寄到那一台 i郵箱（站名當地址、郵遞區號用站的 6 碼）。 */
 function buildBoxes(){
-  var map = {}, order = [], i, p, key;
+  var map = {}, order = [], i, p, key, k, dest;
   for(i = 0; i < ROSTER.length; i++){
     p = ROSTER[i];
-    if(!p.ch) continue;                       /* 沒通路＝自取，不用寄 */
-    if(CH && p.ch !== CH) continue;
-    if(!p.addr) continue;                     /* 沒地址不能寄 */
-    key = (p.box || p.name) + "|" + p.addr;
+    k = kindOf(p.ch);
+    if(!k || k === "other") continue;         /* 自取／超商（暫停）都不在這頁 */
+    if(CH && k !== CH) continue;
+    dest = (k === "ibox") ? (p.ibox || p.addr) : p.addr;
+    if(!dest) continue;                       /* 沒地址／沒站名不能寄 */
+    key = (p.box || p.name) + "|" + k + "|" + dest;
     if(!map[key]){
-      map[key] = { owner:p.box || p.name, phone:p.phone, addr:p.addr, ch:p.ch,
+      map[key] = { owner:p.box || p.name, phone:p.phone, addr:p.addr, ibox:p.ibox || "",
+                   zip:String(p.zip || "").trim(), kind:k, ch:p.ch,
                    who:[], sets:0, on:true, pack:"" };
       order.push(key);
     }
@@ -173,6 +191,23 @@ function buildBoxes(){
     map[key].sets += (p.qty || 1);
   }
   BOXES = order.map(function(k){ return map[k] });
+}
+/* i郵箱站的資料（郵遞區號／地址）：試算表沒填郵遞區號時，用站名去 ibox.json 對 */
+var IBOX = {};
+function iboxInfo(name){
+  name = String(name || "").replace(/\s+/g, "");
+  return IBOX[name] || IBOX[name.replace(/i郵箱$/i, "ｉ郵箱")] || IBOX[name.replace(/ｉ郵箱$/, "i郵箱")] || null;
+}
+/* 這一箱的收件地址＋郵遞區號（產檔用） */
+function destOf(b){
+  if(b.kind === "ibox"){
+    var nm = b.ibox || b.addr;
+    var info = iboxInfo(nm);
+    return { addr: nm, zip: b.zip || (info ? info.zip : ""), sub: info ? info.addr : "", ok: !!(nm && (b.zip || info)) };
+  }
+  var sp = splitAddr(b.addr);
+  var z = b.zip || (sp ? sp.zip : "");
+  return { addr: b.addr, zip: z, sub: "", ok: !!(b.addr && z) };
 }
 
 /* ===== 地址拆縣市／行政區 ===== */
@@ -202,9 +237,10 @@ function calc(b){
 
 /* ===== 畫面 ===== */
 function render(){
-  var h = "", i, b, c, sp;
+  var h = "", i, b, c, d;
   for(i = 0; i < BOXES.length; i++){
-    b = BOXES[i]; c = calc(b); sp = splitAddr(b.addr);
+    b = BOXES[i]; c = calc(b); d = destOf(b);
+    var iboxBad = (b.kind === "ibox" && c.P.kind !== "small");
     h += '<div class="bx' + (b.on ? "" : " off") + '">' +
       '<div class="hd">' +
         '<input class="pick" type="checkbox"' + (b.on ? " checked" : "") +
@@ -212,9 +248,12 @@ function render(){
         '<span class="nm">' + esc(b.owner) + '</span>' +
         '<span class="ph">' + esc(b.phone) + '</span>' +
       '</div>' +
-      '<div class="ad">' + esc(b.addr) +
-        (sp && sp.zip ? ' <b style="color:#7b3fd4">' + sp.zip + '</b>'
-                      : ' <span class="warn">⚠ 查不到郵遞區號</span>') + '</div>' +
+      '<div class="ad">' +
+        (b.kind === "ibox" ? '<span class="kd ibox">📦 i郵箱自取</span> ' : '<span class="kd home">🏠 郵寄到府</span> ') +
+        esc(d.addr) +
+        (d.sub ? '<br><span class="sub2">' + esc(d.sub) + '</span>' : '') +
+        (d.zip ? ' <b style="color:#7b3fd4">' + esc(d.zip) + '</b>'
+               : ' <span class="warn">⚠ 查不到郵遞區號</span>') + '</div>' +
       (b.who.length > 1 ? '<div class="who">同箱：' + b.who.map(esc).join("、") + '</div>' : '') +
       '<div class="row2">' +
         '<span class="qtybox">' +
@@ -233,9 +272,11 @@ function render(){
         (c.P.kind === "small" ? "普通掛號小包" : "國內包裹") + '　' +
         (c.over ? '<span class="bad">⚠ 超過 1kg，資費要查</span>' : '約 ' + c.fee + ' 元') +
       '</div>' +
-      (c.P.kind === "small"
-        ? '<div class="drop ibox">🕘 可投 i郵箱（24 小時）</div>'
-        : '<div class="drop counter">🏤 紙箱要去郵局櫃台</div>') +
+      (iboxBad
+        ? '<div class="drop counter">⚠ 紙箱放不進 i郵箱（單邊 ≤45cm、三邊合計 ≤105cm）：改小包，或請客人改寄到府</div>'
+        : (c.P.kind === "small"
+            ? '<div class="drop ibox">🕘 可投 i郵箱（24 小時）</div>'
+            : '<div class="drop counter">🏤 紙箱要去郵局櫃台</div>')) +
     '</div>';
   }
   $("boxes").innerHTML = h || '<div class="panel">這個通路沒有要寄的人</div>';
@@ -256,7 +297,8 @@ function bump(i, d){ BOXES[i].sets = Math.max(1, Math.min(99, BOXES[i].sets + d)
 function setPack(i, v){ BOXES[i].pack = v; render() }
 function setCh(ch){
   CH = ch;
-  $("mPost").className = "mode" + (ch === "i郵箱" ? " on" : "");
+  $("mHome").className = "mode" + (ch === "home" ? " on" : "");
+  $("mIbox").className = "mode" + (ch === "ibox" ? " on" : "");
   $("mAll").className  = "mode" + (ch === "" ? " on" : "");
   buildBoxes(); render();
 }
@@ -273,22 +315,25 @@ function cellN(ref, v){
   return '<c r="' + ref + '"><v>' + v + '</v></c>';
 }
 function rowXml(kind, n, d){
+  /* 地址類別：一般地址 001／i郵箱地址 002（i郵箱取件：收件地址欄填站名、郵遞區號填站的 6 碼、不可報值） */
+  var at = (d.kind === "ibox") ? "i郵箱地址" : "一般地址";
+  var ac = (d.kind === "ibox") ? "002" : "001";
   var r = n + 4, x = '<row r="' + r + '" spans="1:30">' + cellN("A" + r, n);
   if(kind === "small"){
     x += cellS("B"+r,"普通掛號小包") + cellS("C"+r,d.name) + cellS("D"+r,d.phone) +
-         cellS("E"+r,"一般地址") + cellS("F"+r,d.addr) +
+         cellS("E"+r,at) + cellS("F"+r,d.addr) +
          cellS("K"+r,S.name) + cellS("L"+r,S.phone) + cellS("M"+r,S.addr) +
          cellN("Q"+r,(d.total/1000).toFixed(3)) + cellS("R"+r,d.pkstr) +
-         cellS("T"+r,"001") + cellN("U"+r,d.zip) + cellN("V"+r,S.zip) +
+         cellS("T"+r,ac) + cellN("U"+r,d.zip) + cellN("V"+r,S.zip) +
          cellS("W"+r,"320") + cellS("X"+r,d.pkcode) + cellS("Y"+r,"203");
   } else {
-    x += cellS("B"+r,d.name) + cellS("C"+r,d.phone) + cellS("D"+r,"一般地址") +
+    x += cellS("B"+r,d.name) + cellS("C"+r,d.phone) + cellS("D"+r,at) +
          cellS("E"+r,d.addr) +
          cellS("J"+r,S.name) + cellS("K"+r,S.phone) + cellS("L"+r,S.addr) +
          cellS("P"+r,"其他") + cellS("Q"+r,"保健食品") +
          cellN("R"+r,(d.total/1000).toFixed(3)) + cellS("S"+r,d.pkstr) + cellN("T"+r,60) +
          cellS("V"+r,"退回寄件人(另付退回費)") +
-         cellS("W"+r,"B") + cellS("X"+r,"保健食品") + cellS("Y"+r,"001") + cellS("Z"+r,"001") +
+         cellS("W"+r,"B") + cellS("X"+r,"保健食品") + cellS("Y"+r,"001") + cellS("Z"+r,ac) +
          cellN("AA"+r,d.zip) + cellN("AB"+r,S.zip) + cellS("AC"+r,d.pkcode) + cellS("AD"+r,"202");
   }
   return x + "</row>";
@@ -343,25 +388,27 @@ function dl(blob, filename){
 }
 
 function genFiles(){
-  var small = [], pkg = [], i, b, c, sp, bad = [];
+  var small = [], pkg = [], i, b, c, d, bad = [], badIbox = [];
   for(i = 0; i < BOXES.length; i++){
     b = BOXES[i]; if(!b.on) continue;
-    c = calc(b); sp = splitAddr(b.addr);
-    if(!sp || !sp.zip){ bad.push(b.owner); continue; }
-    var d = { name:b.owner, phone:b.phone, addr:b.addr, zip:sp.zip,
-              total:c.total, pkstr:c.P.str, pkcode:PKCODE[c.P.str] || "0" };
-    (c.P.kind === "small" ? small : pkg).push(d);
+    c = calc(b); d = destOf(b);
+    if(!d.ok){ bad.push(b.owner); continue; }
+    if(b.kind === "ibox" && c.P.kind !== "small"){ badIbox.push(b.owner); continue; }
+    var row = { name:b.owner, phone:b.phone, addr:d.addr, zip:d.zip, kind:b.kind,
+                total:c.total, pkstr:c.P.str, pkcode:PKCODE[c.P.str] || "0" };
+    (c.P.kind === "small" ? small : pkg).push(row);
   }
-  if(bad.length){
-    $("genMsg").textContent = "⚠ 這幾位地址拆不出郵遞區號，先跳過：" + bad.join("、");
-    $("genMsg").style.color = "#c00";
-  } else { $("genMsg").textContent = "產檔中…"; $("genMsg").style.color = "#666" }
+  var msgs = [];
+  if(bad.length)     msgs.push("⚠ 這幾位查不到郵遞區號，先跳過：" + bad.join("、"));
+  if(badIbox.length) msgs.push("⚠ 這幾位是 i郵箱自取但包材是紙箱，先跳過：" + badIbox.join("、"));
+  if(msgs.length){ $("genMsg").textContent = msgs.join("　"); $("genMsg").style.color = "#c00"; }
+  else { $("genMsg").textContent = "產檔中…"; $("genMsg").style.color = "#666" }
   if(!small.length && !pkg.length) return;
 
   var stamp = new Date().toISOString().slice(0,10).replace(/-/g,"");
   var todo = 0, errs = [];
   function done(){ if(--todo === 0){
-    $("genMsg").textContent = errs.length ? ("✖ " + errs.join("；")) : "✅ 產好了，看瀏覽器的下載";
+    $("genMsg").textContent = errs.length ? ("✖ " + errs.join("；")) : ("✅ 產好了，看瀏覽器的下載" + (msgs.length ? "（" + msgs.join("　") + "）" : ""));
     $("genMsg").style.color = errs.length ? "#c00" : "#00913A";
   } }
   if(small.length){ todo++; buildXlsx("small", small, function(e, blob){
@@ -372,18 +419,28 @@ function genFiles(){
 
 /* ===== 開頁 ===== */
 function boot(){
-  fetch("郵遞區號.tsv").then(function(r){ return r.ok ? r.text() : "" }).then(function(t){
+  var pz = fetch("郵遞區號.tsv").then(function(r){ return r.ok ? r.text() : "" }).then(function(t){
     t.split("\n").forEach(function(l){
       var p = l.split("\t"); if(p.length >= 2) ZIP[p[0].trim()] = p[1].trim();
     });
-  }).catch(function(){}).then(function(){
+  }).catch(function(){});
+  /* i郵箱站清單（站名 → 郵遞區號／地址），試算表沒填郵遞區號時用它補 */
+  var pi = fetch("ibox.json").then(function(r){ return r.ok ? r.json() : null }).then(function(j){
+    if(!j || !j.data) return;
+    j.data.forEach(function(a){ IBOX[String(a[0]).replace(/\s+/g, "")] = { zip:a[1], addr:a[2] }; });
+  }).catch(function(){});
+  Promise.all([pz, pi]).then(function(){
     $("sync").textContent = "正在跟試算表要名單…";
     jsonp({ action:"roster" }, function(res){
       if(!res.ok){ $("sync").textContent = "✖ " + (res.error || "撈不到名單"); return }
       ROSTER = res.data || [];
-      var np = 0, na = 0;
-      ROSTER.forEach(function(p){ if(p.ch && p.addr){ na++; if(p.ch === "i郵箱") np++ } });
-      $("nPost").textContent = np; $("nAll").textContent = na;
+      var nh = 0, ni = 0;
+      ROSTER.forEach(function(p){
+        var k = kindOf(p.ch);
+        if(k === "home" && p.addr) nh++;
+        if(k === "ibox" && (p.ibox || p.addr)) ni++;
+      });
+      $("nHome").textContent = nh; $("nIbox").textContent = ni; $("nAll").textContent = nh + ni;
       $("sync").textContent = "✅ 名單 " + ROSTER.length + " 人";
       $("sync").style.color = "#00913A";
       buildBoxes(); render();

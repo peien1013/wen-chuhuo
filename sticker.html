@@ -897,7 +897,7 @@ function normTag(s){
 }
 /* 通路只認這幾種寫法，不要用關鍵字亂猜 —— 編號 S007 裡也有 7 */
 function looksLikeCh(s){
-  return /^(i ?郵箱|郵箱|郵局|中華郵政|7-?11|7-?eleven|統一超商|全家|family ?mart)$/i.test(s);
+  return /^(i ?郵箱|i ?郵箱取件|i ?郵箱自取|郵寄到府|郵寄|郵箱|郵局|中華郵政|7-?11|7-?eleven|統一超商|全家|family ?mart)$/i.test(s);
 }
 /* 同一張訂單（一起登記、一起付錢）的分組。
    訊號來自登記表的「本筆應付」：有金額那列＝一組的開頭，後面空白的都跟它同一組。
@@ -923,7 +923,8 @@ function buildGroups(rows){
    底色框留著，一眼就分得出是哪一家。 */
 function chInfo(s){
   if(!s) return null;
-  if(/郵/.test(s))                    return { name: "i",  cls: "post" };
+  if(/i ?郵箱(取件|自取)/i.test(s))     return { name: "i",  cls: "post" };   /* i郵箱自取（寄到 i郵箱讓客人自己領） */
+  if(/郵|寄|宅/.test(s))              return { name: "郵", cls: "post" };   /* 郵寄到府（舊資料「i郵箱」也算） */
   if(/7|eleven|統一/i.test(s))        return { name: "7",  cls: "seven" };
   if(/全家|family/i.test(s))          return { name: "全", cls: "fami" };
   return { name: s.charAt(0), cls: "other" };
