@@ -59,6 +59,10 @@ h1{font-size:27px;margin:0 0 4px}
 .calc .w{color:#333}
 .calc .bad{color:#c00}
 .bx .warn{font-size:14px;color:#c00;font-weight:800}
+/* 交寄地點：小包放得進 i郵箱（單邊≤45cm、三邊合計≤105cm）→ 晚上假日也能寄；紙箱要等平日櫃台 */
+.drop{display:inline-block;margin-top:7px;font-size:15px;font-weight:800;padding:3px 11px;border-radius:999px}
+.drop.ibox{background:#e9f9ee;color:#00713A;border:1.5px solid #9fd9b3}
+.drop.counter{background:#fff3e6;color:#9a4b00;border:1.5px solid #f0b980}
 
 /* 底部合計 */
 .total{position:sticky;bottom:0;background:#fff;border-top:3px solid var(--brand);
@@ -87,7 +91,8 @@ h1{font-size:27px;margin:0 0 4px}
     </div>
     <p class="hint">
       <b>一箱一張單</b>：試算表上「收件人」相同的人會自動併成一箱（他們本來就寄同一個地址）。<br>
-      組數預設是試算表上的數字，覺得不對就用 <b>＋ −</b> 改。不想寄的把左邊的勾勾點掉。
+      組數預設是試算表上的數字，覺得不對就用 <b>＋ −</b> 改。不想寄的把左邊的勾勾點掉。<br>
+      每箱下面會標 <b>🕘 可投 i郵箱</b>（晚上、假日也能寄）或 <b>🏤 要去櫃台</b>（紙箱放不進 i郵箱）。
     </p>
   </div>
 
@@ -228,6 +233,9 @@ function render(){
         (c.P.kind === "small" ? "普通掛號小包" : "國內包裹") + '　' +
         (c.over ? '<span class="bad">⚠ 超過 1kg，資費要查</span>' : '約 ' + c.fee + ' 元') +
       '</div>' +
+      (c.P.kind === "small"
+        ? '<div class="drop ibox">🕘 可投 i郵箱（24 小時）</div>'
+        : '<div class="drop counter">🏤 紙箱要去郵局櫃台</div>') +
     '</div>';
   }
   $("boxes").innerHTML = h || '<div class="panel">這個通路沒有要寄的人</div>';

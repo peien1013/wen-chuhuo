@@ -10,8 +10,9 @@
   --ink:#1a1a1a; --line:#dcdfe4; --bg:#f2f4f7; --card:#fff;
   --p1:#7b3fd4;  /* 姓名貼紙 紫 */
   --p2:#00913A;  /* 核對 郵政綠 */
-  --p3:#F07000;  /* 出貨系統 7-11 橘 */
-  --p4:#0F6FE0;  /* 試算表 全家藍 */
+  --p3:#00913A;  /* 郵局出貨 郵政綠 */
+  --p4:#0F6FE0;  /* 試算表 藍 */
+  --p5:#9aa0a6;  /* 暫停使用的灰 */
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
@@ -75,6 +76,9 @@ a.card p{font-size:15px;line-height:1.75;color:#666;margin:0}
 a.card .where{margin-top:14px;font-size:13px;color:#999;
   border-top:1px dashed #e2e4e8;padding-top:10px}
 a.card:hover{border-color:var(--c)}
+/* 暫停使用（超商）：整張暗掉，hover 不浮起 */
+a.card.off{opacity:.45;filter:grayscale(.7)}
+a.card.off:hover{transform:none;box-shadow:none;opacity:.7}
 
 /* ⓘ 說明鈕：卡片平常只留步驟／圖示／標題，要看細節才點它 */
 .cardwrap{position:relative;display:flex}
@@ -353,18 +357,18 @@ ul.cols li{margin-bottom:5px}
         <table class="demo">
           <tr><th>姓名</th><th>分類</th><th>編號</th><th>通路</th><th>同箱</th></tr>
           <tr><td>王小明</td><td>疫情</td><td>S001</td><td>i郵箱</td><td>王小明</td></tr>
-          <tr><td>李美美</td><td>日本</td><td>S002</td><td>7-ELEVEN</td><td>王小明</td></tr>
+          <tr><td>李美美</td><td>日本</td><td>S002</td><td></td><td>王小明</td></tr>
         </table>
         <ul class="cols">
           <li><b>姓名</b>　貼紙上印的大字。<b>一定要有。</b></li>
           <li><b>分類</b>　跟在名字旁邊的小字，例「疫情」「日本」。沒有就留空白。</li>
           <li><b>編號</b>　條碼裡面的內容。<b>沒有這欄也沒關係</b>，程式會自動幫你編 S001、S002⋯</li>
-          <li><b>通路</b>　i郵箱／7-ELEVEN／全家。掃碼核對頁靠這欄分左中右三排。</li>
+          <li><b>通路</b>　寫「i郵箱」＝走郵局寄，留空＝自取。掃碼核對頁靠這欄分「要郵寄／自取」。<span class="dim">（7-ELEVEN／全家已暫停使用，先不要填）</span></li>
           <li><b>同箱</b>　這個人的東西要放進<b>誰的箱子</b>（通常寫箱主的名字）。</li>
         </ul>
         標題不用一字不差，這些字都認得：姓名/名字/訂購人、分類/類別/團別/品項、編號/代號/序號/條碼、
         通路/超商/物流、同箱/箱主/收件人。<br>
-        ⚠ <b>通路欄不要寫「7-11」</b>，Google 試算表會把它吃成日期 2026/7/11，請寫 <b>7-ELEVEN</b>。<br>
+        ⚠ 現在只走<b>郵局</b>：通路欄只填「i郵箱」或留空。<br>
         試算表改完存檔就好，<b>姓名貼紙頁</b>和<b>掃碼核對頁</b>下次打開自動撈最新的，程式碼完全不用碰。<br>
         <span class="dim">（沒網路時會自動用內建的舊名單，畫面上會標示，不會卡住。）</span>
       </div>
@@ -437,16 +441,20 @@ var DEFAULT_CARDS = [
     href:"check.html", blank:false,
     desc:"拿掃描槍掃商品上的貼紙，畫面立刻顯示<b>是誰、走哪個通路、要放進誰的箱子</b>。少掃、重複掃都會擋下來，紀錄即時寫進試算表。",
     where:"線上網頁 · check.html" },
-  { c:"p3", step:"第 3 步", ico:"🚚", title:"出貨作業系統",
-    href:"https://script.google.com/macros/s/AKfycbwo5mwyvjcXiMZKPGhbyg0NSaUZnOoSInmhZJZH3MGI5-ZOv2fVC3F5JYZ78IJRsU5x/exec", blank:false,
-    desc:"貼在<b>箱子外面</b>的郵寄標籤。貼上收件人名單 → 產各家匯入檔 → 上傳 i郵箱／7-ELEVEN／全家後台列印。",
-    where:"Google Apps Script · 需登入 peien1013@gmail.com" },
+  { c:"p3", step:"第 3 步", ico:"📮", title:"郵局出貨",
+    href:"post.html", blank:false,
+    desc:"貼在<b>箱子外面</b>的郵寄標籤。點要寄的、調組數 → 自動算包材和郵資 → 產郵局官方上傳檔 → 到 EZPost 上傳，<b>一次印 10 張</b>。平日拿去郵局櫃台；晚上或假日，放得進的拿去 i郵箱（24 小時）。",
+    where:"線上網頁 · post.html" },
   { c:"p4", step:"資料", ico:"📊", title:"2026靈芝蟲草登記",
     href:"https://docs.google.com/spreadsheets/d/10SbHfrNyisO6iFUrcSKr8hgMnAFenjMybY0VPNE1t5o/edit", blank:true,
     desc:"名單的源頭。<b>標籤貼紙</b>分頁＝42 人的姓名／分類／編號／通路；<b>郵寄出貨</b>分頁＝25 箱的收件人與門市。",
-    where:"Google 試算表" }
+    where:"Google 試算表" },
+  { c:"p5", step:"暫停使用", ico:"🏪", title:"超商出貨（7-ELEVEN／全家）", off:true,
+    href:"https://script.google.com/macros/s/AKfycbwo5mwyvjcXiMZKPGhbyg0NSaUZnOoSInmhZJZH3MGI5-ZOv2fVC3F5JYZ78IJRsU5x/exec", blank:false,
+    desc:"2026-09-03 起<b>先不用</b>：寄件一律走郵局。這支是舊的三通路出貨作業系統（7-ELEVEN 交貨便／全家 好賣+），程式和設定都還在，哪天要用再打開。",
+    where:"Google Apps Script · 需登入 peien1013@gmail.com" }
 ];
-var CARDS_KEY = "wenChuhuoCards_v1";
+var CARDS_KEY = "wenChuhuoCards_v2";   /* 2026-09-03 換成郵局版卡片，key 升版讓舊的自訂卡片失效 */
 var CARDS = [];
 
 function loadCards(){
@@ -478,6 +486,7 @@ function renderCards(){
     a.className = "card";
     a.style.setProperty("--c", "var(--" + (d.c || "p1") + ")");
     a.href = d.href || "#";
+    if(d.off) a.classList.add("off");   /* 暫停使用的通路：暗掉，還是能點進去 */
     if(d.blank){ a.target = "_blank"; a.rel = "noopener"; }
     a.innerHTML =
       '<span class="step">' + escHtml(d.step) + "</span>" +
@@ -818,7 +827,7 @@ var LAB_PRESETS = {
     { h:"姓名",     d:["王小明","陳美玲"] },
     { h:"分類",     d:["日本","疫情"] },
     { h:"編號",     d:["S001","S002"] },
-    { h:"通路",     d:["i郵箱","7-ELEVEN"] },
+    { h:"通路",     d:["i郵箱",""] },
     { h:"組數",     d:["1","2"] },
     { h:"同箱",     d:["王小明","陳美玲"] }
   ],
@@ -827,7 +836,7 @@ var LAB_PRESETS = {
     { h:"訂購人",       d:["王小明","陳美玲"] },
     { h:"組數",         d:["1","2"] },
     { h:"本筆應付",     d:["9100",""] },
-    { h:"超商通路",     d:["i郵箱","7-ELEVEN"] },
+    { h:"超商通路",     d:["i郵箱",""] },
     { h:"收件人姓名",   d:["王小明","王小明"] },
     { h:"備註",         d:["日本行","疫情需要"] },
     { h:"編號",         d:["S001","S002"] }
@@ -911,7 +920,7 @@ function labRender(){
   if(!m.taken.name) w.push("沒認出<b>姓名</b>欄 → 系統會直接拿<b>第 1 欄</b>當姓名。標題寫「姓名」「名字」「訂購人」都認得。");
   if(!m.taken.code) w.push("沒有<b>編號</b>欄 → 會自動幫你編 S001、S002⋯（可以，但<b>之後名單中間插人號碼會全部位移</b>，建議自己開一欄）。");
   if(!m.taken.qty)  w.push("沒有<b>組數</b>欄 → <b>每人只印 1 張</b>。有人訂 2 組以上就會少印。");
-  if(!m.taken.ch)   w.push("沒有<b>領取方式</b>欄 → 全部當<b>自取</b>，核對頁不會分 i郵箱／7-11／全家。");
+  if(!m.taken.ch)   w.push("沒有<b>領取方式</b>欄 → 全部當<b>自取</b>，核對頁不會分「要郵寄／自取」。");
   if(!m.taken.box)  w.push("沒有<b>關係人</b>欄 → 核對頁不會顯示「放進誰的箱子」。一箱裝好幾個人時會找不到。");
   var dup = {}, dupmsg = [];
   for(i = 0; i < LAB.length; i++){
@@ -921,7 +930,7 @@ function labRender(){
     dup[t2] = 1;
   }
   w = w.concat(dupmsg);
-  w.push("⚠ 領取方式欄<b>不要寫「7-11」</b>，Google 試算表會吃成日期 2026/7/11。寫 <b>7-ELEVEN</b>。");
+  w.push("⚠ 現在只走<b>郵局</b>：領取方式欄填「i郵箱」＝要寄，留空＝自取。7-ELEVEN／全家已暫停，先不要填。");
   w.push("第一列一定要是<b>標題</b>，資料從第二列開始。名單中間<b>不要空兩列以上</b>，會被當成到此為止。");
   o += '<h4>提醒</h4><div class="warn">· ' + w.join("<br>· ") + '</div>';
   document.getElementById("labOut").innerHTML = o;
