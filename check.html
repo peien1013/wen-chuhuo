@@ -829,6 +829,11 @@ function stamp(){
 }
 function lookup(raw){
   var code = String(raw).trim().toUpperCase();
+  /* QR 碼是網址的話（例：花蓮宜蘭識別證 …/hl/?GEXAA），取網址最後一段當編號 */
+  if(/[\/?=]/.test(code)){
+    var seg = code.split(/[\/?=&#]+/).filter(function(s){ return s; });
+    code = seg.length ? seg[seg.length - 1] : "";
+  }
   if(!code) return;
 
   /* 掃到批次標（P-開頭）＝「這批我印好了」，不是掃某個人 */
@@ -907,6 +912,11 @@ function gunKeydown(e){
   else if(/^Digit[0-9]$/.test(c))     ch = c.substring(5);
   else if(/^Numpad[0-9]$/.test(c))    ch = c.substring(6);
   else if(c === "Minus" || c === "NumpadSubtract") ch = "-";
+  /* 網址型 QR 碼（識別證）會用到的符號，一樣讀實體鍵位，中文輸入法開著也沒關係 */
+  else if(c === "Slash")     ch = e.shiftKey ? "?" : "/";
+  else if(c === "Period")    ch = ".";
+  else if(c === "Equal")     ch = "=";
+  else if(c === "Semicolon") ch = ":";
   else if(c === "Backspace"){ GUN.buf = GUN.buf.slice(0, -1); e.preventDefault(); return; }
   else if(c === "Enter" || c === "NumpadEnter"){
     e.preventDefault();
