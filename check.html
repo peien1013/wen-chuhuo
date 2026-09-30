@@ -53,6 +53,7 @@ h1{font-size:26px;margin:0 0 3px}
 .ch.tagE{background:#B45309}
 .ch.tagJ{background:#0F6FE0}
 .ch.tagO{background:#6B7280}
+.ch.tagT{background:#7C3AED}
 #bigShip{margin-top:12px;font-size:27px;font-weight:800;line-height:1.3}
 #bigShip .ch{font-size:26px;padding:3px 16px}
 #bigShip .box{margin-left:12px;color:#222}
@@ -601,20 +602,23 @@ function load(){
 /* 自取模式改成照「分類」分三堆（疫情／日本／其他），因為使用者是照分類分堆放。
    郵寄模式還是照通路分（現在只有郵局）。 */
 function groupKey(p){
+  var t = String(p.tag || "");
+  /* 花蓮宜蘭識別證借用：分類有「台北」的另外一堆（要交給台北的人帶回去），全部／自取模式都分出來 */
+  if(!isShip(p) && /台北/.test(t)) return "台北";
   if(FILTER === "self"){
-    var t = String(p.tag || "");
     if(/疫情|防疫|新冠|仙丹/.test(t)) return "疫情";
     if(/日本|橫濱|沖繩/.test(t))      return "日本";
     return "其他";
   }
   return p.ch || "自取";
 }
-var TAG_ORDER = [/^疫情$/, /^日本$/, /^其他$/];
+var TAG_ORDER = [/^台北$/, /^疫情$/, /^日本$/, /^其他$/];
 /* 欄位標題的色塊。自取模式是分類（疫情／日本／其他），郵寄模式是通路 */
 function headChip(c){
   if(c === "疫情") return '<span class="ch tagE">疫情</span>';
   if(c === "日本") return '<span class="ch tagJ">日本</span>';
   if(c === "其他") return '<span class="ch tagO">其他／空白</span>';
+  if(c === "台北") return '<span class="ch tagT">🚌 台北</span>';
   if(c === "自取") return '<span class="ch self">🏠 自取</span>';
   return chChip(c);
 }
@@ -698,7 +702,7 @@ function renderList(flashCode){
 
     /* 自取那一區人最多，讓它整排通吃（見 .gcol.wide）*/
     /* 只剩一欄（例如「要郵寄」模式下只有郵局）也整排通吃，不要縮在 1/3 寬 */
-    h += '<div class="gcol' + ((c === "自取" || order.length === 1) ? " wide" : "") + '"><div class="ghead">' + headChip(c) +
+    h += '<div class="gcol' + ((c === "自取" || c === "台北" || order.length === 1) ? " wide" : "") + '"><div class="ghead">' + headChip(c) +
          '<span class="gcount">' + done + " / " + all + " 組" +
          (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
