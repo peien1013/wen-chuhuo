@@ -54,6 +54,11 @@ h1{font-size:26px;margin:0 0 3px}
 .ch.tagJ{background:#0F6FE0}
 .ch.tagO{background:#6B7280}
 .ch.tagT{background:#7C3AED}
+/* 花蓮宜蘭識別證分車（10/3）：接駁 1～8 車各一色；掃到時看板上出現大大的車號，照車號放進袋子 */
+.ch.bus1{background:#DC2626}.ch.bus2{background:#EA580C}.ch.bus3{background:#CA8A04}.ch.bus4{background:#16A34A}
+.ch.bus5{background:#0891B2}.ch.bus6{background:#2563EB}.ch.bus7{background:#7C3AED}.ch.bus8{background:#DB2777}
+.ch.busS{background:#6B7280}
+#bigShip .ch.busBig{font-size:54px;padding:6px 28px;border-radius:14px;letter-spacing:3px}
 #bigShip{margin-top:12px;font-size:27px;font-weight:800;line-height:1.3}
 #bigShip .ch{font-size:26px;padding:3px 16px}
 #bigShip .box{margin-left:12px;color:#222}
@@ -605,6 +610,10 @@ function groupKey(p){
   var t = String(p.tag || "");
   /* 花蓮宜蘭識別證借用：分類有「台北」的另外一堆（要交給台北的人帶回去），全部／自取模式都分出來 */
   if(!isShip(p) && /台北/.test(t)) return "台北";
+  /* 花蓮宜蘭識別證分車（10/3）：分類寫「接駁N車」→ 照車分堆；「自行前往」另一堆 */
+  var bm = t.match(/接駁\s*(\d+)\s*車/);
+  if(!isShip(p) && bm) return "接駁" + bm[1] + "車";
+  if(!isShip(p) && /自行/.test(t)) return "自行前往";
   if(FILTER === "self"){
     if(/疫情|防疫|新冠|仙丹/.test(t)) return "疫情";
     if(/日本|橫濱|沖繩/.test(t))      return "日本";
@@ -613,12 +622,19 @@ function groupKey(p){
   return p.ch || "自取";
 }
 var TAG_ORDER = [/^台北$/, /^疫情$/, /^日本$/, /^其他$/];
+/* 接駁車色塊：1～8 車各一色，其他（自行前往）灰色 */
+function busChip(c, extra){
+  var n = parseInt(String(c).replace(/\D/g, ""), 10);
+  return '<span class="ch ' + (n >= 1 && n <= 8 ? "bus" + n : "busS") + (extra ? " " + extra : "") + '">🚌 ' + esc(c) + "</span>";
+}
 /* 欄位標題的色塊。自取模式是分類（疫情／日本／其他），郵寄模式是通路 */
 function headChip(c){
   if(c === "疫情") return '<span class="ch tagE">疫情</span>';
   if(c === "日本") return '<span class="ch tagJ">日本</span>';
   if(c === "其他") return '<span class="ch tagO">其他／空白</span>';
   if(c === "台北") return '<span class="ch tagT">🚌 台北</span>';
+  if(/^接駁\d+車$/.test(c)) return busChip(c, "");
+  if(c === "自行前往") return '<span class="ch busS">🚶 自行前往</span>';
   if(c === "自取") return '<span class="ch self">🏠 自取</span>';
   return chChip(c);
 }
@@ -676,6 +692,11 @@ function renderList(flashCode){
   }
   var keys = Object.keys(groups);
   var ORD = (FILTER === "self") ? TAG_ORDER : CH_ORDER;
+  /* 花蓮宜蘭識別證分車：接駁 1～8 車照車號排最前面，自行前往接在後面 */
+  keys.filter(function(k){ return /^接駁\d+車$/.test(k); })
+      .sort(function(a, b){ return parseInt(a.replace(/\D/g, ""), 10) - parseInt(b.replace(/\D/g, ""), 10); })
+      .forEach(function(k){ order.push(k); });
+  if(keys.indexOf("自行前往") >= 0) order.push("自行前往");
   for(i = 0; i < ORD.length; i++){
     for(var ki = 0; ki < keys.length; ki++){
       if(order.indexOf(keys[ki]) < 0 && ORD[i].test(keys[ki])) order.push(keys[ki]);
@@ -702,7 +723,7 @@ function renderList(flashCode){
 
     /* 自取那一區人最多，讓它整排通吃（見 .gcol.wide）*/
     /* 只剩一欄（例如「要郵寄」模式下只有郵局）也整排通吃，不要縮在 1/3 寬 */
-    h += '<div class="gcol' + ((c === "自取" || c === "台北" || order.length === 1) ? " wide" : "") + '"><div class="ghead">' + headChip(c) +
+    h += '<div class="gcol' + ((c === "自取" || c === "台北" || /^接駁\d+車$/.test(c) || c === "自行前往" || order.length === 1) ? " wide" : "") + '"><div class="ghead">' + headChip(c) +
          '<span class="gcount">' + done + " / " + all + " 組" +
          (all !== list.length ? "（" + list.length + " 人）" : "") +
          (nBox ? "　·　" + nBox + " 箱" : "") + "</span>" +
@@ -774,7 +795,10 @@ function board(cls, name, code, msg, p){
   $("bigName").textContent = name;
   $("bigCode").innerHTML = esc(code || "") +
     (p && p.tag ? ' <span class="bigTag">' + esc(p.tag) + "</span>" : "");
-  $("bigShip").innerHTML = boxLine(p);
+  var gk = p ? groupKey(p) : "";
+  $("bigShip").innerHTML = /^接駁\d+車$/.test(gk) ? busChip(gk, "busBig")
+                         : gk === "自行前往" ? '<span class="ch busS busBig">🚶 自行前往</span>'
+                         : boxLine(p);
   $("bigMsg").textContent = msg || "";
 }
 
