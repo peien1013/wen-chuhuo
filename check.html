@@ -34,6 +34,7 @@ h1{font-size:26px;margin:0 0 3px}
 #bigCode{font-size:30px;font-weight:700;color:#555;margin-top:6px;letter-spacing:3px}
 .bigTag{font-size:36px;font-weight:800;color:#7a4a00;background:#ffe08a;
   padding:2px 20px;border-radius:10px;margin-left:12px;letter-spacing:2px}
+.bigTag.d3{background:#cfe0ff;color:#1e3a8a}
 /* 通路徽章：郵政綠。7-11 橘／全家藍留著沒刪，2026-09-03 起超商暫停、只走郵局 */
 .ch{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border-radius:7px;
   font-weight:800;color:#fff;font-size:0.95em;letter-spacing:1px;
@@ -177,6 +178,9 @@ button.ghost{background:#fff;color:#333;border:1px solid #bbb}
 .p.done.seven .pc{color:#F07000}
 .p.done.fami{background:#e9f1fd;border-color:#0F6FE0}
 .p.done.fami .pc{color:#0F6FE0}
+/* 花蓮宜蘭識別證：三天兩夜＝淡藍卡（跟識別證藍色一致）；掃到後照樣變淡綠＋✅（.p.done 寫在後面會蓋過底色），分類小標維持藍色 */
+.p.d3{background:#e6f0ff;border-color:#a9c4f2}
+.p.d3 .ptg .tg{background:#cfe0ff;color:#1e3a8a}
 .p.done{background:#eef7f1;border-color:#8fbfa4}
 .p.flash{animation:pop .5s}
 @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.09);box-shadow:0 0 0 6px rgba(0,145,58,.22)}100%{transform:scale(1)}}
@@ -645,6 +649,7 @@ var CH_ORDER = [/到府|^i ?郵箱$|郵寄|post/i, /i ?郵箱(取件|自取)/i, 
 
 function cardHtml(p, flashCode, extraCls){
   return '<div class="p ' + (p.ch ? chCls(p.ch) : "") + (p.scanned ? " done" : "") +
+         (/三天/.test(p.tag || "") ? " d3" : "") +
          (extraCls ? " " + extraCls : "") +
          (flashCode && p.code === flashCode ? " flash" : "") +
          '" title="' + esc(p.time || "還沒掃") + '">' +
@@ -794,7 +799,7 @@ function board(cls, name, code, msg, p){
   b.className = cls;
   $("bigName").textContent = name;
   $("bigCode").innerHTML = esc(code || "") +
-    (p && p.tag ? ' <span class="bigTag">' + esc(p.tag) + "</span>" : "");
+    (p && p.tag ? ' <span class="bigTag' + (/三天/.test(p.tag) ? " d3" : "") + '">' + esc(p.tag) + "</span>" : "");
   var gk = p ? groupKey(p) : "";
   $("bigShip").innerHTML = /^接駁\d+車$/.test(gk) ? busChip(gk, "busBig")
                          : gk === "自行前往" ? '<span class="ch busS busBig">🚶 自行前往</span>'
